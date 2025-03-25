@@ -15,7 +15,7 @@ class MongoDAO:
     self.battles_collection = self.db["battles"]
     self.leaderboard_collection = self.db["leaderboard"]
 
-  # ---------- Model 操作 ----------
+  # ---------- Model ----------
 
   def insert_model(self, model: Model) -> ObjectId:
     data = asdict(model)
@@ -41,14 +41,20 @@ class MongoDAO:
     result = self.models_collection.delete_one({"_id": model_id})
     return result.deleted_count > 0
 
-  def find_models(self, language: str, file_size_category: Optional[str] = None) -> List[Model]:
-    query = {"language": language}
-    if file_size_category is not None:
-      query["file_size_category"] = file_size_category
+  def find_models(self, language: str, weight_class: str) -> List[Model]:
+    query = {
+      "language": language,
+      "weight_class": weight_class
+    }
     cursor = self.models_collection.find(query)
     return [Model(**doc) for doc in cursor]
 
-  # ---------- Battle 操作 ----------
+  def find_all_models(self, language: str) -> List[Model]:
+    query = {"language": language}
+    cursor = self.models_collection.find(query)
+    return [Model(**doc) for doc in cursor]
+
+  # ---------- Battle ----------
 
   def insert_battle(self, battle: Battle) -> ObjectId:
     data = asdict(battle)
@@ -74,15 +80,15 @@ class MongoDAO:
     result = self.battles_collection.delete_one({"_id": battle_id})
     return result.deleted_count > 0
 
-  def find_battles(self, language: str, file_size_category: str) -> List[Battle]:
+  def find_battles(self, language: str, weight_class: str) -> List[Battle]:
     query = {
-        "language": language,
-        "file_size_category": file_size_category
+      "language": language,
+      "weight_class": weight_class
     }
     cursor = self.battles_collection.find(query)
     return [Battle(**doc) for doc in cursor]
 
-  # ---------- LeaderboardEntry 操作 ----------
+  # ---------- LeaderboardEntry ----------
 
   def insert_leaderboard_entry(self, entry: LeaderboardEntry) -> ObjectId:
     data = asdict(entry)
@@ -97,11 +103,11 @@ class MongoDAO:
       return LeaderboardEntry(**data)
     return None
 
-  def get_leaderboard_entry_by_model(self, language: str, file_size_category: str, model_id: ObjectId) -> Optional[
+  def get_leaderboard_entry_by_model(self, language: str, weight_class: str, model_id: ObjectId) -> Optional[
     LeaderboardEntry]:
     data = self.leaderboard_collection.find_one({
       "language": language,
-      "file_size_category": file_size_category,
+      "weight_class": weight_class,
       "model_id": model_id
     })
     if data:
@@ -119,10 +125,10 @@ class MongoDAO:
     result = self.leaderboard_collection.delete_one({"_id": entry_id})
     return result.deleted_count > 0
 
-  def find_leaderboard(self, language: str, file_size_category: str) -> List[LeaderboardEntry]:
+  def find_leaderboard(self, language: str, weight_class: str) -> List[LeaderboardEntry]:
     query = {
       "language": language,
-      "file_size_category": file_size_category
+      "weight_class": weight_class
     }
     cursor = self.leaderboard_collection.find(query).sort("elo_score", -1)
     return [LeaderboardEntry(**doc) for doc in cursor]

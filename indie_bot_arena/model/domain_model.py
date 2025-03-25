@@ -12,8 +12,8 @@ class Model:
   quantization: str           # 量子化方式 (例: "none", "bnb", "gptq")
   file_format: str            # 保存形式 (例: "safetensors", "gguf")
   file_size_gb: float         # ファイルサイズ（単位: GB）
-  file_size_category: str     # サイズ区分 (例: "U-8GB", "U-4GB")
   language: str               # 言語区分 (例: "ja", "en")
+  weight_class: str           # サイズ区分 (例: "U-8GB", "U-4GB")
   description: Optional[str] = None
   created_at: datetime = field(default_factory=datetime.utcnow)
   _id: Optional[ObjectId] = None
@@ -24,7 +24,7 @@ class Battle:
   model_a_id: ObjectId
   model_b_id: ObjectId
   language: str
-  file_size_category: str
+  weight_class: str
   winner_model_id: ObjectId
   user_id: str
   vote_timestamp: datetime = field(default_factory=datetime.utcnow)
@@ -35,7 +35,7 @@ class Battle:
 class LeaderboardEntry:
   model_id: ObjectId
   language: str
-  file_size_category: str
+  weight_class: str
   elo_score: int
   last_updated: datetime = field(default_factory=datetime.utcnow)
   _id: Optional[ObjectId] = None
