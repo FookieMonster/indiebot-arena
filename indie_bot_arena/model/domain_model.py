@@ -7,10 +7,13 @@ from bson import ObjectId
 
 @dataclass
 class Model:
-  model_name: str
-  language: str
-  file_size_gb: float
-  file_size_category: str
+  model_name: str             # 例: "fukugawa/gemma-2-9b-finetuned-bnb-4bit"
+  runtime: str                # 実行環境 (例: "transformers", "llama.cpp")
+  quantization: str           # 量子化方式 (例: "none", "bnb", "gptq")
+  file_format: str            # 保存形式 (例: "safetensors", "gguf")
+  file_size_gb: float         # ファイルサイズ（単位: GB）
+  file_size_category: str     # サイズ区分 (例: "U-8GB", "U-4GB")
+  language: str               # 言語区分 (例: "ja", "en")
   description: Optional[str] = None
   created_at: datetime = field(default_factory=datetime.utcnow)
   _id: Optional[ObjectId] = None
