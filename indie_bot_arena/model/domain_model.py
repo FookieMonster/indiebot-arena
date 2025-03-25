@@ -1,7 +1,8 @@
 from dataclasses import dataclass, field
 from datetime import datetime
-from bson import ObjectId
 from typing import Optional
+
+from bson import ObjectId
 
 
 @dataclass
