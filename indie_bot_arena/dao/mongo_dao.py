@@ -15,6 +15,16 @@ class MongoDAO:
     self.battles_collection = self.db["battles"]
     self.leaderboard_collection = self.db["leaderboard"]
 
+    self.models_collection.create_index(
+      [("language", 1), ("weight_class", 1), ("model_name", 1)], unique=True
+    )
+    self.leaderboard_collection.create_index(
+      [("language", 1), ("weight_class", 1), ("model_id", 1)], unique=True
+    )
+    self.battles_collection.create_index(
+      [("language", 1), ("weight_class", 1), ("vote_timestamp", 1)]
+    )
+
   # ---------- Model ----------
 
   def insert_model(self, model: Model) -> ObjectId:
