@@ -12,11 +12,7 @@ class ArenaService:
 
   # ---------- Model ----------
 
-  def register_model(self, language: str, weight_class: str, model_name: str, description: Optional[
-    str] = None) -> ObjectId:
-    raise NotImplementedError("このメソッドは未実装です。")
-
-  def get_all_models(self, language: str) -> List[Model]:
+  def register_model(self, language: str, weight_class: str, model_name: str, description: Optional[str] = None) -> ObjectId:
     raise NotImplementedError("このメソッドは未実装です。")
 
   def get_two_random_models(self, language: str, weight_class: str) -> Tuple[Model, Model]:

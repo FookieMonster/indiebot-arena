@@ -49,11 +49,6 @@ class MongoDAO:
     cursor = self.models_collection.find(query)
     return [Model(**doc) for doc in cursor]
 
-  def find_all_models(self, language: str) -> List[Model]:
-    query = {"language": language}
-    cursor = self.models_collection.find(query)
-    return [Model(**doc) for doc in cursor]
-
   # ---------- Battle ----------
 
   def insert_battle(self, battle: Battle) -> ObjectId:
@@ -125,7 +120,7 @@ class MongoDAO:
     result = self.leaderboard_collection.delete_one({"_id": entry_id})
     return result.deleted_count > 0
 
-  def find_leaderboard(self, language: str, weight_class: str) -> List[LeaderboardEntry]:
+  def find_leaderboard_entries(self, language: str, weight_class: str) -> List[LeaderboardEntry]:
     query = {
       "language": language,
       "weight_class": weight_class
