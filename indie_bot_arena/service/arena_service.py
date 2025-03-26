@@ -1,4 +1,5 @@
 import random
+import re
 from datetime import datetime
 from typing import List, Optional, Tuple, Dict
 
@@ -6,6 +7,9 @@ from bson import ObjectId
 
 from indie_bot_arena.dao.mongo_dao import MongoDAO
 from indie_bot_arena.model.domain_model import Model, Battle, LeaderboardEntry
+
+INITIAL_RATING = 1000
+K_FACTOR = 32
 
 
 class ArenaService:
@@ -25,6 +29,44 @@ class ArenaService:
       file_size_gb: float,
       description: Optional[str] = None
   ) -> ObjectId:
+    # Non-empty checks
+    if not model_name.strip():
+      raise ValueError("Model name cannot be empty.")
+    if not runtime.strip():
+      raise ValueError("Runtime cannot be empty.")
+    if not quantization.strip():
+      raise ValueError("Quantization cannot be empty.")
+    if not file_format.strip():
+      raise ValueError("File format cannot be empty.")
+
+    # Validation
+    if runtime!="transformers":
+      raise ValueError("Runtime must be 'transformers'.")
+    if quantization not in ("bnb", "none"):
+      raise ValueError("Quantization must be 'bnb' or 'none'.")
+    if file_format!="safetensors":
+      raise ValueError("File format must be 'safetensors'.")
+    if language not in ("ja", "en"):
+      raise ValueError("Language must be 'ja' or 'en'.")
+    if weight_class not in ("U-4GB", "U-8GB"):
+      raise ValueError("Weight class must be 'U-4GB' or 'U-8GB'.")
+    if file_size_gb <= 0:
+      raise ValueError("File size must be greater than 0.")
+    if weight_class=="U-4GB" and file_size_gb >= 4.0:
+      raise ValueError("For U-4GB, file size must be less than 4.0.")
+    if weight_class=="U-8GB" and file_size_gb >= 8.0:
+      raise ValueError("For U-8GB, file size must be less than 8.0.")
+    if not re.match(r"^[^/]+/[^/]+$", model_name):
+      raise ValueError("Model name must be in 'xxxxx/xxxxxx' format.")
+
+    # Description length check
+    if description is not None and len(description) > 1024:
+      raise ValueError("Description must be 1024 characters or less.")
+
+    # Duplicate check
+    if self.dao.find_one_model(language, weight_class, model_name) is not None:
+      raise ValueError("A model with this language, weight class and model name already exists.")
+
     model = Model(
       model_name=model_name,
       runtime=runtime,
@@ -52,7 +94,7 @@ class ArenaService:
   ) -> Tuple[Model, Model]:
     models = self.dao.find_models(language, weight_class)
     if len(models) < 2:
-      raise ValueError("バトルに必要なモデルが2件以上存在しません")
+      raise ValueError("Need at least 2 models for a battle.")
     return tuple(random.sample(models, 2))
 
   def get_model_dropdown_list(
@@ -103,54 +145,45 @@ class ArenaService:
       weight_class: str
   ) -> bool:
     """
-    対戦履歴に基づき、Elo レーティングを再計算してリーダーボードを更新します。
-    各モデルは初期レーティング 1000 から開始し、K=32 の Elo 更新式を適用します。
+    Update the leaderboard using battle history.
+    Each model starts at INITIAL_RATING and K is K_FACTOR.
     """
-    # 対象言語・階級のモデル一覧を取得
     models = self.dao.find_models(language, weight_class)
     if not models:
       return False
 
-    # 各モデルの初期レーティング (1000) を設定
     ratings = {
-      str(model._id): 1000 for model in models if model._id is not None
+      str(model._id): INITIAL_RATING for model in models if model._id is not None
     }
 
-    # 対戦履歴を取得し、時系列順に並べ替え
     battles = self.dao.find_battles(language, weight_class)
     battles.sort(key=lambda b: b.vote_timestamp)
 
-    K = 32  # Elo の K ファクター
     for battle in battles:
       model_a_id_str = str(battle.model_a_id)
       model_b_id_str = str(battle.model_b_id)
 
-      # 念のため、両モデルが ratings に存在しなければ初期値を設定
       if model_a_id_str not in ratings:
-        ratings[model_a_id_str] = 1000
+        ratings[model_a_id_str] = INITIAL_RATING
       if model_b_id_str not in ratings:
-        ratings[model_b_id_str] = 1000
+        ratings[model_b_id_str] = INITIAL_RATING
 
-      # 勝者に応じたスコアを設定
       if str(battle.winner_model_id)==model_a_id_str:
         score_a, score_b = 1, 0
       else:
         score_a, score_b = 0, 1
 
-      # 期待値の計算
       exp_a = 1 / (1 + 10 ** ((ratings[model_b_id_str] - ratings[model_a_id_str]) / 400))
       exp_b = 1 / (1 + 10 ** ((ratings[model_a_id_str] - ratings[model_b_id_str]) / 400))
 
-      # Elo レーティングの更新
-      ratings[model_a_id_str] += K * (score_a - exp_a)
-      ratings[model_b_id_str] += K * (score_b - exp_b)
+      ratings[model_a_id_str] += K_FACTOR * (score_a - exp_a)
+      ratings[model_b_id_str] += K_FACTOR * (score_b - exp_b)
 
-    # 各モデルの新たなレーティングでリーダーボードエントリを更新または新規作成
     for model in models:
       if model._id is None:
         continue
       model_id_str = str(model._id)
-      new_rating = round(ratings.get(model_id_str, 1000))
+      new_rating = round(ratings.get(model_id_str, INITIAL_RATING))
       entry = self.dao.find_one_leaderboard_entry(language, weight_class, model._id)
       if entry:
         entry.elo_score = new_rating
