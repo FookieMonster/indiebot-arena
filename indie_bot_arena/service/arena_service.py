@@ -151,7 +151,7 @@ class ArenaService:
         continue
       model_id_str = str(model._id)
       new_rating = round(ratings.get(model_id_str, 1000))
-      entry = self.dao.get_leaderboard_entry_by_model(language, weight_class, model._id)
+      entry = self.dao.find_one_leaderboard_entry(language, weight_class, model._id)
       if entry:
         entry.elo_score = new_rating
         entry.last_updated = datetime.utcnow()

@@ -109,17 +109,6 @@ class MongoDAO:
       return LeaderboardEntry(**data)
     return None
 
-  def get_leaderboard_entry_by_model(self, language: str, weight_class: str, model_id: ObjectId) -> Optional[
-    LeaderboardEntry]:
-    data = self.leaderboard_collection.find_one({
-      "language": language,
-      "weight_class": weight_class,
-      "model_id": model_id
-    })
-    if data:
-      return LeaderboardEntry(**data)
-    return None
-
   def update_leaderboard_entry(self, entry: LeaderboardEntry) -> bool:
     data = asdict(entry)
     if data.get("_id") is None:
@@ -138,3 +127,14 @@ class MongoDAO:
     }
     cursor = self.leaderboard_collection.find(query).sort("elo_score", -1)
     return [LeaderboardEntry(**doc) for doc in cursor]
+
+  def find_one_leaderboard_entry(self, language: str, weight_class: str, model_id: ObjectId) -> Optional[
+    LeaderboardEntry]:
+    data = self.leaderboard_collection.find_one({
+      "language": language,
+      "weight_class": weight_class,
+      "model_id": model_id
+    })
+    if data:
+      return LeaderboardEntry(**data)
+    return None
