@@ -49,6 +49,17 @@ class MongoDAO:
     cursor = self.models_collection.find(query)
     return [Model(**doc) for doc in cursor]
 
+  def find_one_model(self, language: str, weight_class: str, model_name: str) -> Optional[Model]:
+    query = {
+      "language": language,
+      "weight_class": weight_class,
+      "model_name": model_name
+    }
+    data = self.models_collection.find_one(query)
+    if data:
+      return Model(**data)
+    return None
+
   # ---------- Battle ----------
 
   def insert_battle(self, battle: Battle) -> ObjectId:
