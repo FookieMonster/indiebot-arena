@@ -119,6 +119,27 @@ class ArenaService:
       winner_model_id: ObjectId,
       user_id: str
   ) -> ObjectId:
+    # Validation
+    if language not in ("ja", "en"):
+      raise ValueError("Language must be 'ja' or 'en'.")
+    if weight_class not in ("U-4GB", "U-8GB"):
+      raise ValueError("Weight class must be 'U-4GB' or 'U-8GB'.")
+
+    if model_a_id is None or model_b_id is None or winner_model_id is None:
+      raise ValueError("All model IDs must be provided.")
+
+    if model_a_id==model_b_id:
+      raise ValueError("Model A and Model B must be different.")
+
+    if winner_model_id!=model_a_id and winner_model_id!=model_b_id:
+      raise ValueError("Winner model ID must be either model_a_id or model_b_id.")
+
+    # Check model exists
+    model_a = self.dao.get_model(model_a_id)
+    model_b = self.dao.get_model(model_b_id)
+    if model_a is None or model_b is None:
+      raise ValueError("Both Model A and Model B must exist in the database.")
+
     battle = Battle(
       model_a_id=model_a_id,
       model_b_id=model_b_id,
