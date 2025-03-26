@@ -8,7 +8,7 @@ from indie_bot_arena.service.bootstrap_service import BootstrapService
 class TestBootstrapService(unittest.TestCase):
   @classmethod
   def setUpClass(cls):
-    cls.dao = MongoDAO(db_name="test_db_bootstrap")
+    cls.dao = MongoDAO(uri="mongodb://localhost:27017", db_name="test_db_bootstrap")
     cls.bootstrap_service = BootstrapService(cls.dao)
 
   def setUp(self):

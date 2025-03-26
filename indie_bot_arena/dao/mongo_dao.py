@@ -8,7 +8,7 @@ from indie_bot_arena.model.domain_model import Model, Battle, LeaderboardEntry
 
 
 class MongoDAO:
-  def __init__(self, uri: str = "mongodb://localhost:27017", db_name: str = "test_db"):
+  def __init__(self, uri: str, db_name: str):
     self.client = MongoClient(uri)
     self.db = self.client[db_name]
     self.models_collection = self.db["models"]
