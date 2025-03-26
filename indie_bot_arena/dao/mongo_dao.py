@@ -43,7 +43,7 @@ class MongoDAO:
   def update_model(self, model: Model) -> bool:
     data = asdict(model)
     if data.get("_id") is None:
-      raise ValueError("Model の _id は更新のために必要です。")
+      raise ValueError("model _id is required for updating.")
     result = self.models_collection.replace_one({"_id": data["_id"]}, data)
     return result.modified_count > 0
 
@@ -88,7 +88,7 @@ class MongoDAO:
   def update_battle(self, battle: Battle) -> bool:
     data = asdict(battle)
     if data.get("_id") is None:
-      raise ValueError("Battle の _id は更新のために必要です。")
+      raise ValueError("battle _id is required for updating.")
     result = self.battles_collection.replace_one({"_id": data["_id"]}, data)
     return result.modified_count > 0
 
@@ -122,7 +122,7 @@ class MongoDAO:
   def update_leaderboard_entry(self, entry: LeaderboardEntry) -> bool:
     data = asdict(entry)
     if data.get("_id") is None:
-      raise ValueError("LeaderboardEntry の _id は更新のために必要です。")
+      raise ValueError("leaderboard _id is required for updating.")
     result = self.leaderboard_collection.replace_one({"_id": data["_id"]}, data)
     return result.modified_count > 0
 
