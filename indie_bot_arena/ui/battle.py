@@ -86,6 +86,7 @@ def battle_content(dao, language):
     winner = model_a if vote_choice=="Chatbot A" else model_b
     try:
       arena_service.record_battle(language, weight_class, model_a._id, model_b._id, winner._id, "anonymous")
+      arena_service.update_leaderboard(language, weight_class)
       return "Vote recorded."
     except Exception as e:
       return f"Error recording vote: {e}"
