@@ -7,5 +7,5 @@ def generate():
   pass
 
 
-def battle_content():
+def battle_content(dao):
   gr.Markdown("チャットバトル")
