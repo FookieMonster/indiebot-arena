@@ -6,6 +6,8 @@ from indie_bot_arena.ui.battle import battle_content
 from indie_bot_arena.ui.leaderboard import leaderboard_content
 from indie_bot_arena.ui.registration import registration_content
 
+LANGUAGE = "ja"
+
 dao = MongoDAO("mongodb://localhost:27017", "indie_bot_arena_db")
 bootstrap_service = BootstrapService(dao)
 bootstrap_service.provision_database()
@@ -13,10 +15,11 @@ bootstrap_service.provision_database()
 with gr.Blocks() as demo:
   with gr.Tabs():
     with gr.TabItem("リーダーボード"):
-      leaderboard_content(dao)
+      leaderboard_content(dao, LANGUAGE)
     with gr.TabItem("チャットバトル"):
-      battle_content(dao)
+      battle_content(dao, LANGUAGE)
     with gr.TabItem("モデルの登録"):
-      registration_content(dao)
+      registration_content(dao, LANGUAGE)
 
-demo.launch()
+if __name__=="__main__":
+  demo.queue(max_size=20).launch()

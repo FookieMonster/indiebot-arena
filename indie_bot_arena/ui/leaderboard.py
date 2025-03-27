@@ -3,7 +3,7 @@ import gradio as gr
 from indie_bot_arena.service.arena_service import ArenaService
 
 
-def leaderboard_content(dao):
+def leaderboard_content(dao, language):
   arena_service = ArenaService(dao)
 
   def fetch_leaderboard_data(language, weight_class):
@@ -34,7 +34,7 @@ def leaderboard_content(dao):
           interactive=False
         )
         refresh_u4gb.click(
-          fn=lambda: fetch_leaderboard_data("ja", "U-4GB"),
+          fn=lambda: fetch_leaderboard_data(language, "U-4GB"),
           inputs=[],
           outputs=leaderboard_table_u4gb
         )
@@ -45,7 +45,7 @@ def leaderboard_content(dao):
           interactive=False
         )
         refresh_u8gb.click(
-          fn=lambda: fetch_leaderboard_data("ja", "U-8GB"),
+          fn=lambda: fetch_leaderboard_data(language, "U-8GB"),
           inputs=[],
           outputs=leaderboard_table_u8gb
         )

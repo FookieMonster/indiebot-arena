@@ -66,26 +66,26 @@ def submit_message(message, history_a, history_b, model_a, model_b):
   return history_a, history_b, ""
 
 
-def battle_content(dao):
+def battle_content(dao, language):
   arena_service = ArenaService(dao)
   default_weight = "U-8GB"
-  initial_models = arena_service.get_model_dropdown_list("ja", default_weight)
+  initial_models = arena_service.get_model_dropdown_list(language, default_weight)
   initial_choices = [m["label"] for m in initial_models] if initial_models else []
 
-  def update_model_dropdown(weight_class):
-    models = arena_service.get_model_dropdown_list("ja", weight_class)
+  def fetch_model_dropdown(weight_class):
+    models = arena_service.get_model_dropdown_list(language, weight_class)
     model_labels = [m["label"] for m in models] if models else []
     update_obj = gr.update(choices=model_labels, value=model_labels[0] if model_labels else "")
     return update_obj, update_obj
 
   def submit_vote(vote_choice, weight_class, model_a_name, model_b_name):
-    model_a = arena_service.get_one_model("ja", weight_class, model_a_name)
-    model_b = arena_service.get_one_model("ja", weight_class, model_b_name)
+    model_a = arena_service.get_one_model(language, weight_class, model_a_name)
+    model_b = arena_service.get_one_model(language, weight_class, model_b_name)
     if model_a is None or model_b is None:
       return "Model not found. Vote not recorded."
     winner = model_a if vote_choice=="Chatbot A" else model_b
     try:
-      arena_service.record_battle("ja", weight_class, model_a._id, model_b._id, winner._id, "anonymous")
+      arena_service.record_battle(language, weight_class, model_a._id, model_b._id, winner._id, "anonymous")
       return "Vote recorded."
     except Exception as e:
       return f"Error recording vote: {e}"
@@ -99,7 +99,7 @@ def battle_content(dao):
       model_dropdown_b = gr.Dropdown(choices=initial_choices, label="Select Model B", value=initial_choices[
         0] if initial_choices else "")
     weight_class_radio.change(
-      fn=update_model_dropdown,
+      fn=fetch_model_dropdown,
       inputs=weight_class_radio,
       outputs=[model_dropdown_a, model_dropdown_b]
     )
