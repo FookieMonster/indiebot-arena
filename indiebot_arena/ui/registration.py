@@ -26,7 +26,7 @@ def format_model_meta(meta: ModelMeta) -> str:
     f"Architecture: {meta.architecture}\n"
     f"Parameters: {meta.parameters}\n"
     f"Model Type: {meta.model_type}\n"
-    f"Weights File Size: {round(meta.weights_file_size, 2)} GB\n"
+    f"Weights File Size: {meta.weights_file_size} GB\n"
     f"Weights Format: {meta.weights_format}\n"
     f"Quantization: {meta.quantization}"
   )
@@ -48,7 +48,7 @@ def get_model_meta(model_id: str):
       file_url = hf_hub_url(model_id, filename=file_name)
       metadata = get_hf_file_metadata(file_url)
       total_size += metadata.size or 0
-    total_size_gb = total_size / (1024 ** 3)
+    total_size_gb = round(total_size / (1024 ** 3), 2)
     model_type = type(model).__name__
     quant_config = getattr(config, 'quantization_config', {})
     quant_method = quant_config.get('quant_method', 'none')
@@ -121,10 +121,7 @@ def registration_content(dao, language):
       quantization = "bnd" if meta.quantization.lower()=="bitsandbytes" else "none"
       weights_format = meta.weights_format
       file_format = "safetensors" if "safetensors" in weights_format.lower() else weights_format
-      architecture = meta.architecture
-      model_type = meta.model_type
-      parameters = meta.parameters
-      desc = description if description else f"Architecture: {architecture}, Model Type: {model_type}, Parameters: {parameters}"
+      desc = description if description else ""
       arena_service.register_model(language, weight_class, model_id_extracted, "transformers", quantization, file_format, file_size_gb, desc)
       result = "モデルの登録が完了しました。"
       disable = True
