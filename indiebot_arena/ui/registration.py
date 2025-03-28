@@ -93,7 +93,7 @@ def registration_content(dao, language):
       register_enabled = False
     return (current_output + "\n" + result_text, gr.update(interactive=register_enabled))
 
-  def test_model(model_id, weight_class, current_output):
+  def load_test(model_id, weight_class, current_output):
     meta = get_model_meta(model_id)
     if isinstance(meta, str) and meta.startswith("Error:"):
       return (current_output + "\n" + meta, gr.update(interactive=False), None)
@@ -127,13 +127,20 @@ def registration_content(dao, language):
       desc = description if description else f"Architecture: {architecture}, Model Type: {model_type}, Parameters: {parameters}"
       arena_service.register_model(language, weight_class, model_id_extracted, "transformers", quantization, file_format, file_size_gb, desc)
       result = "モデルの登録が完了しました。"
+      disable = True
     except Exception as e:
       result = f"エラー: {str(e)}"
-    return (current_output + "\n" + result, meta)
+      disable = False
+    new_output = current_output + "\n" + result
+    if disable:
+      btn_update = gr.update(interactive=False)
+    else:
+      btn_update = gr.update()
+    return new_output, meta, btn_update, btn_update, btn_update
 
   def clear_all():
     initial_weight = "U-4GB"
-    return "", initial_weight, "", "", gr.update(interactive=False), gr.update(interactive=False), None
+    return "", initial_weight, "", "", gr.update(interactive=True), gr.update(interactive=False), gr.update(interactive=False), None
 
   with gr.Blocks(css="style.css") as ui:
     gr.Markdown(DESCRIPTION)
@@ -156,12 +163,13 @@ def registration_content(dao, language):
         chat_test_btn = gr.Button("チャットテスト", interactive=False)
         register_btn = gr.Button("モデル登録", interactive=False)
         clear_btn = gr.Button("クリア")
-      test_btn.click(fn=test_model, inputs=[model_id_input, reg_weight_class_radio, output_box], outputs=[output_box,
+      test_btn.click(fn=load_test, inputs=[model_id_input, reg_weight_class_radio, output_box], outputs=[output_box,
                                                                                                           chat_test_btn,
                                                                                                           meta_state])
       chat_test_btn.click(fn=chat_test, inputs=[model_id_input, output_box], outputs=[output_box, register_btn])
       register_btn.click(fn=register_model, inputs=[meta_state, reg_weight_class_radio, description_input,
-                                                    output_box], outputs=[output_box, meta_state])
+                                                    output_box], outputs=[output_box, meta_state, test_btn,
+                                                                          chat_test_btn, register_btn])
       clear_btn.click(fn=clear_all, inputs=[], outputs=[model_id_input, reg_weight_class_radio, description_input,
-                                                        output_box, chat_test_btn, register_btn, meta_state])
+                                                        output_box, test_btn, chat_test_btn, register_btn, meta_state])
   return ui
