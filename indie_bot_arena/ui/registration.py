@@ -1,3 +1,5 @@
+from dataclasses import dataclass
+
 import gradio as gr
 import spaces
 import torch
@@ -7,21 +9,38 @@ from transformers import AutoTokenizer, AutoModelForCausalLM, AutoConfig
 DESCRIPTION = "# 登録済みモデル"
 
 
+@dataclass
+class ModelMeta:
+  model_id: str
+  architecture: list
+  parameters: str
+  model_type: str
+  weights_file_size: float
+  weights_format: str
+  quantization: str
+
+
+def format_model_meta(meta: ModelMeta) -> str:
+  return (
+    f"Model ID: {meta.model_id}\n"
+    f"Architecture: {meta.architecture}\n"
+    f"Parameters: {meta.parameters}\n"
+    f"Model Type: {meta.model_type}\n"
+    f"Weights File Size: {round(meta.weights_file_size, 2)} GB\n"
+    f"Weights Format: {meta.weights_format}\n"
+    f"Quantization: {meta.quantization}"
+  )
+
+
 @spaces.GPU(duration=30)
-def get_model_info(model_id):
+def get_model_meta(model_id: str):
   try:
     config = AutoConfig.from_pretrained(model_id)
-    model = AutoModelForCausalLM.from_pretrained(
-      model_id,
-      device_map="auto",
-      torch_dtype=torch.bfloat16
-    )
+    model = AutoModelForCausalLM.from_pretrained(model_id, device_map="auto", torch_dtype=torch.bfloat16)
     tokenizer = AutoTokenizer.from_pretrained(model_id)
     repo_info = model_info(model_id)
-    weights_files = [
-      file.rfilename for file in repo_info.siblings
-      if file.rfilename.endswith('.bin') or file.rfilename.endswith('.safetensors')
-    ]
+    weights_files = [file.rfilename for file in repo_info.siblings if
+                     file.rfilename.endswith('.bin') or file.rfilename.endswith('.safetensors')]
     total_size = 0
     file_formats = set()
     for file_name in weights_files:
@@ -33,16 +52,16 @@ def get_model_info(model_id):
     model_type = type(model).__name__
     quant_config = getattr(config, 'quantization_config', {})
     quant_method = quant_config.get('quant_method', 'none')
-    info = {
-      "Model ID": model_id,
-      "Architecture": config.architectures,
-      "Parameters": f"{round(sum(p.numel() for p in model.parameters()) / 1e9, 2)} Billion",
-      "Model Type": model_type,
-      "Weights File Size": f"{round(total_size_gb, 2)} GB",
-      "Weights Format": ", ".join(file_formats),
-      "Quantization": quant_method,
-    }
-    return "\n".join(f"{key}: {value}" for key, value in info.items())
+    meta = ModelMeta(
+      model_id=model_id,
+      architecture=config.architectures if hasattr(config, 'architectures') else [],
+      parameters=f"{round(sum(p.numel() for p in model.parameters()) / 1e9, 2)} Billion",
+      model_type=model_type,
+      weights_file_size=total_size_gb,
+      weights_format=", ".join(file_formats),
+      quantization=quant_method,
+    )
+    return meta
   except Exception as e:
     return f"Error: {str(e)}"
 
@@ -56,88 +75,58 @@ def registration_content(dao, language):
     data = []
     for m in models:
       created_at_str = m.created_at.strftime("%Y-%m-%d %H:%M:%S") if m.created_at else ""
-      data.append([
-        m.language,
-        m.weight_class,
-        m.model_name,
-        m.runtime,
-        m.quantization,
-        m.file_format,
-        m.file_size_gb,
-        m.description or "",
-        created_at_str
-      ])
+      data.append([m.language, m.weight_class, m.model_name, m.runtime, m.quantization, m.file_format, m.file_size_gb,
+                   m.description or "", created_at_str])
     return data
 
   def test_model(model_id, weight_class, current_output):
-    info = get_model_info(model_id)
-    if info.startswith("Error:"):
-      return (current_output + "\n" + info, gr.update(interactive=False))
-    meta_dict = {}
-    for line in info.splitlines():
-      parts = line.split(":", 1)
-      if len(parts)==2:
-        meta_dict[parts[0].strip()] = parts[1].strip()
-    if "Weights File Size" not in meta_dict:
-      err = "Error: Weights File Size not found."
-      return (current_output + "\n" + err, gr.update(interactive=False))
-    try:
-      size_str = meta_dict["Weights File Size"]
-      file_size = float(size_str.replace("GB", "").strip())
-    except Exception as e:
-      err = f"Error: Invalid file size format: {size_str}"
-      return (current_output + "\n" + err, gr.update(interactive=False))
-    if weight_class=="U-4GB" and file_size >= 4.0:
+    meta = get_model_meta(model_id)
+    if isinstance(meta, str) and meta.startswith("Error:"):
+      return (current_output + "\n" + meta, gr.update(interactive=False), None)
+    if weight_class=="U-4GB" and meta.weights_file_size >= 4.0:
       err = "Error: File size exceeds U-4GB limit."
-      return (current_output + "\n" + err, gr.update(interactive=False))
-    if weight_class=="U-8GB" and file_size >= 8.0:
+      return (current_output + "\n" + err, gr.update(interactive=False), None)
+    if weight_class=="U-8GB" and meta.weights_file_size >= 8.0:
       err = "Error: File size exceeds U-8GB limit."
-      return (current_output + "\n" + err, gr.update(interactive=False))
-    if "Weights Format" not in meta_dict or "safetensors" not in meta_dict["Weights Format"].lower():
+      return (current_output + "\n" + err, gr.update(interactive=False), None)
+    if "safetensors" not in meta.weights_format.lower():
       err = "Error: Weights Format must include safetensors."
-      return (current_output + "\n" + err, gr.update(interactive=False))
-    if "Quantization" not in meta_dict or meta_dict["Quantization"].lower() not in ["bitsandbytes", "none"]:
+      return (current_output + "\n" + err, gr.update(interactive=False), None)
+    if meta.quantization.lower() not in ["bitsandbytes", "none"]:
       err = "Error: Quantization must be bitsandbytes or none."
-      return (current_output + "\n" + err, gr.update(interactive=False))
-    # メタ情報にロードテスト完了メッセージを追記して返す
-    return (current_output + "\n" + info + "\nロードテストが完了しました。", gr.update(interactive=True))
+      return (current_output + "\n" + err, gr.update(interactive=False), None)
+    display_str = format_model_meta(meta) + "\nロードテストが完了しました。"
+    return (current_output + "\n" + display_str, gr.update(interactive=True), meta)
 
-  def register_model(current_output, weight_class, description):
+  def register_model(meta, weight_class, description, current_output):
     try:
-      lines = current_output.splitlines()
-      meta_dict = {}
-      for line in lines:
-        parts = line.split(":", 1)
-        if len(parts)==2:
-          meta_dict[parts[0].strip()] = parts[1].strip()
-      model_id_extracted = meta_dict.get("Model ID")
-      weights_file_size_str = meta_dict.get("Weights File Size", "0 GB")
-      try:
-        file_size_gb = float(weights_file_size_str.replace("GB", "").strip())
-      except:
-        file_size_gb = 0.0
-      quantization = "bnd" if meta_dict.get("Quantization", "none")=="bitsandbytes" else "none"
-      weights_format = meta_dict.get("Weights Format", "")
-      file_format = "safetensors" if "safetensors" in weights_format else weights_format
-      architecture = meta_dict.get("Architecture", "")
-      model_type = meta_dict.get("Model Type", "")
-      parameters = meta_dict.get("Parameters", "")
+      if meta is None:
+        raise ValueError("No meta info available. ロードテストを実施してください。")
+      model_id_extracted = meta.model_id
+      file_size_gb = meta.weights_file_size
+      quantization = "bnd" if meta.quantization.lower()=="bitsandbytes" else "none"
+      weights_format = meta.weights_format
+      file_format = "safetensors" if "safetensors" in weights_format.lower() else weights_format
+      architecture = meta.architecture
+      model_type = meta.model_type
+      parameters = meta.parameters
       desc = description if description else f"Architecture: {architecture}, Model Type: {model_type}, Parameters: {parameters}"
       arena_service.register_model(language, weight_class, model_id_extracted, "transformers", quantization, file_format, file_size_gb, desc)
       result = "モデルの登録が完了しました。"
     except Exception as e:
       result = f"エラー: {str(e)}"
-    return (current_output + "\n" + result)
+    return (current_output + "\n" + result, meta)
+
+  def clear_all():
+    initial_weight = "U-4GB"
+    return "", initial_weight, "", "", gr.update(interactive=False), None
 
   with gr.Blocks(css="style.css") as ui:
     gr.Markdown(DESCRIPTION)
     weight_class_radio = gr.Radio(choices=["U-4GB", "U-8GB"], label="Weight Class", value="U-4GB")
     mdl_list = gr.Dataframe(
-      headers=[
-        "Language", "Weight Class", "Model Name", "Runtime",
-        "Quantization", "Weights Format", "Weights File Size",
-        "Description", "Created At"
-      ],
+      headers=["Language", "Weight Class", "Model Name", "Runtime", "Quantization", "Weights Format",
+               "Weights File Size", "Description", "Created At"],
       value=fetch_models("U-4GB"),
       interactive=False
     )
@@ -147,19 +136,16 @@ def registration_content(dao, language):
       reg_weight_class_radio = gr.Radio(choices=["U-4GB", "U-8GB"], label="Weight Class", value="U-4GB")
       description_input = gr.Textbox(label="Description (オプション)", placeholder="任意の説明を入力", max_lines=1)
       output_box = gr.Textbox(label="結果出力", lines=10)
+      meta_state = gr.State(None)
       with gr.Row():
         test_btn = gr.Button("ロードテスト")
         register_btn = gr.Button("モデル登録", interactive=False)
         clear_btn = gr.Button("クリア")
-      test_btn.click(
-        fn=test_model,
-        inputs=[model_id_input, reg_weight_class_radio, output_box],
-        outputs=[output_box, register_btn]
-      )
-      register_btn.click(
-        fn=register_model,
-        inputs=[output_box, reg_weight_class_radio, description_input],
-        outputs=output_box
-      )
-      clear_btn.click(fn=lambda: "", inputs=[], outputs=output_box)
+      test_btn.click(fn=test_model, inputs=[model_id_input, reg_weight_class_radio, output_box], outputs=[output_box,
+                                                                                                          register_btn,
+                                                                                                          meta_state])
+      register_btn.click(fn=register_model, inputs=[meta_state, reg_weight_class_radio, description_input,
+                                                    output_box], outputs=[output_box, meta_state])
+      clear_btn.click(fn=clear_all, inputs=[], outputs=[model_id_input, reg_weight_class_radio, description_input,
+                                                        output_box, register_btn, meta_state])
   return ui
