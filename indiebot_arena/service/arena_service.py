@@ -5,8 +5,8 @@ from typing import List, Optional, Tuple, Dict
 
 from bson import ObjectId
 
-from indie_bot_arena.dao.mongo_dao import MongoDAO
-from indie_bot_arena.model.domain_model import Model, Battle, LeaderboardEntry
+from indiebot_arena.dao.mongo_dao import MongoDAO
+from indiebot_arena.model.domain_model import Model, Battle, LeaderboardEntry
 
 INITIAL_RATING = 1000
 K_FACTOR = 32

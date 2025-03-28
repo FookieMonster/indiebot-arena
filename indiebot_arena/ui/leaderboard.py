@@ -1,7 +1,7 @@
 import gradio as gr
 import pandas as pd
 
-from indie_bot_arena.service.arena_service import ArenaService
+from indiebot_arena.service.arena_service import ArenaService
 
 DESCRIPTION = "# リーダーボード"
 

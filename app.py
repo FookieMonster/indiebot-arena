@@ -2,11 +2,11 @@ import os
 
 import gradio as gr
 
-from indie_bot_arena.dao.mongo_dao import MongoDAO
-from indie_bot_arena.service.bootstrap_service import BootstrapService
-from indie_bot_arena.ui.battle import battle_content
-from indie_bot_arena.ui.leaderboard import leaderboard_content
-from indie_bot_arena.ui.registration import registration_content
+from indiebot_arena.dao.mongo_dao import MongoDAO
+from indiebot_arena.service.bootstrap_service import BootstrapService
+from indiebot_arena.ui.battle import battle_content
+from indiebot_arena.ui.leaderboard import leaderboard_content
+from indiebot_arena.ui.registration import registration_content
 
 MONGO_DB_URI = os.environ.get("MONGO_DB_URI", "mongodb://localhost:27017")
 MONGO_DB_NAME = os.environ.get("MONGO_DB_NAME", "test_db")

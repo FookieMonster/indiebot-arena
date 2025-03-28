@@ -4,7 +4,7 @@ from typing import List, Optional
 from bson import ObjectId
 from pymongo import MongoClient
 
-from indie_bot_arena.model.domain_model import Model, Battle, LeaderboardEntry
+from indiebot_arena.model.domain_model import Model, Battle, LeaderboardEntry
 
 
 class MongoDAO:

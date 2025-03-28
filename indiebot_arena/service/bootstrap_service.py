@@ -1,8 +1,8 @@
 import logging
 from datetime import datetime
 
-from indie_bot_arena.dao.mongo_dao import MongoDAO
-from indie_bot_arena.model.domain_model import Model
+from indiebot_arena.dao.mongo_dao import MongoDAO
+from indiebot_arena.model.domain_model import Model
 
 
 class BootstrapService:

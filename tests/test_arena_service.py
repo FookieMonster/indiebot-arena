@@ -1,8 +1,8 @@
 import logging
 import unittest
 
-from indie_bot_arena.dao.mongo_dao import MongoDAO
-from indie_bot_arena.service.arena_service import ArenaService
+from indiebot_arena.dao.mongo_dao import MongoDAO
+from indiebot_arena.service.arena_service import ArenaService
 
 
 class TestArenaService(unittest.TestCase):

@@ -1,8 +1,8 @@
 import logging
 import unittest
 
-from indie_bot_arena.dao.mongo_dao import MongoDAO
-from indie_bot_arena.service.bootstrap_service import BootstrapService
+from indiebot_arena.dao.mongo_dao import MongoDAO
+from indiebot_arena.service.bootstrap_service import BootstrapService
 
 
 class TestBootstrapService(unittest.TestCase):

@@ -67,8 +67,8 @@ def get_model_meta(model_id: str):
 
 
 def registration_content(dao, language):
-  from indie_bot_arena.service.arena_service import ArenaService
-  from indie_bot_arena.ui.battle import generate
+  from indiebot_arena.service.arena_service import ArenaService
+  from indiebot_arena.ui.battle import generate
   arena_service = ArenaService(dao)
 
   def fetch_models(weight_class):

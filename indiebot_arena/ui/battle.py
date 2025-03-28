@@ -6,7 +6,7 @@ import spaces
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-from indie_bot_arena.service.arena_service import ArenaService
+from indiebot_arena.service.arena_service import ArenaService
 
 DESCRIPTION = "# チャットバトル"
 MAX_INPUT_TOKEN_LENGTH = int(os.getenv("MAX_INPUT_TOKEN_LENGTH", "4096"))
