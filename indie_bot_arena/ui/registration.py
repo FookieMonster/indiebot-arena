@@ -68,6 +68,7 @@ def get_model_meta(model_id: str):
 
 def registration_content(dao, language):
   from indie_bot_arena.service.arena_service import ArenaService
+  from indie_bot_arena.ui.battle import generate
   arena_service = ArenaService(dao)
 
   def fetch_models(weight_class):
@@ -78,6 +79,19 @@ def registration_content(dao, language):
       data.append([m.language, m.weight_class, m.model_name, m.runtime, m.quantization, m.file_format, m.file_size_gb,
                    m.description or "", created_at_str])
     return data
+
+  def chat_test(model_id, current_output):
+    question = "日本の首都は？"
+    expected_word = "東京"
+    response = generate(question, [], model_id)
+    result_text = f"チャットテストの質問: {question}\n応答: {response}\n"
+    if expected_word in response:
+      result_text += "チャットテスト合格: 応答に期待するワードが含まれています。"
+      register_enabled = True
+    else:
+      result_text += "チャットテスト失敗: 応答に期待するワードが含まれていません。"
+      register_enabled = False
+    return (current_output + "\n" + result_text, gr.update(interactive=register_enabled))
 
   def test_model(model_id, weight_class, current_output):
     meta = get_model_meta(model_id)
@@ -95,7 +109,7 @@ def registration_content(dao, language):
     if meta.quantization.lower() not in ["bitsandbytes", "none"]:
       err = "Error: Quantization must be bitsandbytes or none."
       return (current_output + "\n" + err, gr.update(interactive=False), None)
-    display_str = format_model_meta(meta) + "\nロードテストが完了しました。"
+    display_str = format_model_meta(meta) + "\nロードテストが完了しました。チャットテストを実施してください。"
     return (current_output + "\n" + display_str, gr.update(interactive=True), meta)
 
   def register_model(meta, weight_class, description, current_output):
@@ -119,7 +133,7 @@ def registration_content(dao, language):
 
   def clear_all():
     initial_weight = "U-4GB"
-    return "", initial_weight, "", "", gr.update(interactive=False), None
+    return "", initial_weight, "", "", gr.update(interactive=False), gr.update(interactive=False), None
 
   with gr.Blocks(css="style.css") as ui:
     gr.Markdown(DESCRIPTION)
@@ -139,13 +153,15 @@ def registration_content(dao, language):
       meta_state = gr.State(None)
       with gr.Row():
         test_btn = gr.Button("ロードテスト")
+        chat_test_btn = gr.Button("チャットテスト", interactive=False)
         register_btn = gr.Button("モデル登録", interactive=False)
         clear_btn = gr.Button("クリア")
       test_btn.click(fn=test_model, inputs=[model_id_input, reg_weight_class_radio, output_box], outputs=[output_box,
-                                                                                                          register_btn,
+                                                                                                          chat_test_btn,
                                                                                                           meta_state])
+      chat_test_btn.click(fn=chat_test, inputs=[model_id_input, output_box], outputs=[output_box, register_btn])
       register_btn.click(fn=register_model, inputs=[meta_state, reg_weight_class_radio, description_input,
                                                     output_box], outputs=[output_box, meta_state])
       clear_btn.click(fn=clear_all, inputs=[], outputs=[model_id_input, reg_weight_class_radio, description_input,
-                                                        output_box, register_btn, meta_state])
+                                                        output_box, chat_test_btn, register_btn, meta_state])
   return ui
