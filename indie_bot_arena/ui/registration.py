@@ -88,20 +88,23 @@ def registration_content(dao, language):
       return f"エラー: {str(e)}"
 
   with gr.Blocks() as ui:
-    with gr.Tabs():
-      for weight in ["U-4GB", "U-8GB"]:
-        with gr.TabItem(weight):
-          headers = ["Language", "Weight Class", "Model Name", "Runtime", "Quantization", "File Format",
-                     "File Size (GB)", "Description", "Created At"]
-          mdl_list = gr.Dataframe(headers=headers, value=fetch_models(weight), interactive=False)
-          with gr.Accordion("モデル登録", open=False):
-            model_id_input = gr.Textbox(label="モデルID", max_lines=1)
-            description_input = gr.Textbox(label="Description (オプション)", placeholder="任意の説明を入力", max_lines=1)
-            test_btn = gr.Button("テスト")
-            meta_info_box = gr.Textbox(label="Meta情報", lines=10)
-            register_btn = gr.Button("登録")
-            result_txt = gr.Textbox(label="結果")
-            test_btn.click(test_model, inputs=model_id_input, outputs=meta_info_box)
-            register_btn.click(lambda meta, desc, w=weight: register_model(meta, w, desc), inputs=[meta_info_box,
-                                                                                                   description_input], outputs=result_txt)
+    gr.Markdown("## 登録済みモデル (Language: " + language + ")")
+    weight_class_radio = gr.Radio(choices=["U-4GB", "U-8GB"], label="Weight Class", value="U-4GB")
+    mdl_list = gr.Dataframe(
+      headers=["Language", "Weight Class", "Model Name", "Runtime", "Quantization", "File Format", "File Size (GB)",
+               "Description", "Created At"],
+      value=fetch_models("U-4GB"),
+      interactive=False
+    )
+    weight_class_radio.change(fn=fetch_models, inputs=weight_class_radio, outputs=mdl_list)
+    with gr.Accordion("モデル登録", open=False):
+      model_id_input = gr.Textbox(label="モデルID", max_lines=1)
+      description_input = gr.Textbox(label="Description (オプション)", placeholder="任意の説明を入力", max_lines=1)
+      test_btn = gr.Button("テスト")
+      meta_info_box = gr.Textbox(label="Meta情報", lines=10)
+      register_btn = gr.Button("登録")
+      result_txt = gr.Textbox(label="結果")
+      test_btn.click(fn=test_model, inputs=model_id_input, outputs=meta_info_box)
+      register_btn.click(fn=register_model, inputs=[meta_info_box, weight_class_radio,
+                                                    description_input], outputs=result_txt)
   return ui
