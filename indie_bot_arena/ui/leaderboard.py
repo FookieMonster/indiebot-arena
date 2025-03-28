@@ -19,14 +19,15 @@ def leaderboard_content(dao, language):
       data.append([model_name, entry.elo_score, file_size, desc, last_updated])
     if not data:
       data = [["No data available", "", "", "", ""]]
-    return pd.DataFrame(data, columns=["Model Name", "Elo Score", "File Size (GB)", "Description", "Last Updated"])
+    df = pd.DataFrame(data, columns=["Model Name", "Elo Score", "File Size (GB)", "Description", "Last Updated"])
+    df.insert(0, "Rank", range(1, len(df) + 1))
+    return df
 
   with gr.Blocks() as leaderboard_ui:
     gr.Markdown("## Leaderboard (Language: ja)")
-    # ラジオボタンで重量区分を選択
     weight_class_radio = gr.Radio(choices=["U-4GB", "U-8GB"], label="Weight Class", value="U-4GB")
     leaderboard_table = gr.Dataframe(
-      headers=["Model Name", "Elo Score", "File Size (GB)", "Description", "Last Updated"],
+      headers=["Rank", "Model Name", "Elo Score", "File Size (GB)", "Description", "Last Updated"],
       value=fetch_leaderboard_data("U-4GB"),
       interactive=False
     )
