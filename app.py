@@ -16,7 +16,10 @@ dao = MongoDAO(MONGO_DB_URI, MONGO_DB_NAME)
 bootstrap_service = BootstrapService(dao)
 bootstrap_service.provision_database()
 
-with gr.Blocks() as demo:
+with open("style.css", "r") as f:
+  custom_css = f.read()
+
+with gr.Blocks(css=custom_css) as demo:
   with gr.Tabs():
     with gr.TabItem("リーダーボード"):
       leaderboard_content(dao, LANGUAGE)
