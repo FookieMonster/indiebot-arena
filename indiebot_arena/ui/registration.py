@@ -80,19 +80,6 @@ def registration_content(dao, language):
                    m.description or "", created_at_str])
     return data
 
-  def chat_test(model_id, current_output):
-    question = "日本の首都は？"
-    expected_word = "東京"
-    response = generate(question, [], model_id)
-    result_text = f"チャットテストの質問: {question}\n応答: {response}\n"
-    if expected_word in response:
-      result_text += "チャットテスト合格: 応答に期待するワードが含まれています。"
-      register_enabled = True
-    else:
-      result_text += "チャットテスト失敗: 応答に期待するワードが含まれていません。"
-      register_enabled = False
-    return (current_output + "\n" + result_text, gr.update(interactive=register_enabled))
-
   def load_test(model_id, weight_class, current_output):
     meta = get_model_meta(model_id)
     if isinstance(meta, str) and meta.startswith("Error:"):
@@ -111,6 +98,19 @@ def registration_content(dao, language):
       return (current_output + "\n" + err, gr.update(interactive=False), None)
     display_str = format_model_meta(meta) + "\nロードテストが完了しました。チャットテストを実施してください。"
     return (current_output + "\n" + display_str, gr.update(interactive=True), meta)
+
+  def chat_test(model_id, current_output):
+    question = "日本の首都は？"
+    expected_word = "東京"
+    response = generate(question, [], model_id)
+    result_text = f"チャットテストの質問: {question}\n応答: {response}\n"
+    if expected_word in response:
+      result_text += "チャットテスト合格: 応答に期待するワードが含まれています。"
+      register_enabled = True
+    else:
+      result_text += "チャットテスト失敗: 応答に期待するワードが含まれていません。"
+      register_enabled = False
+    return (current_output + "\n" + result_text, gr.update(interactive=register_enabled))
 
   def register_model(meta, weight_class, description, current_output):
     try:
@@ -164,8 +164,8 @@ def registration_content(dao, language):
         register_btn = gr.Button("モデル登録", interactive=False)
         clear_btn = gr.Button("クリア")
       test_btn.click(fn=load_test, inputs=[model_id_input, reg_weight_class_radio, output_box], outputs=[output_box,
-                                                                                                          chat_test_btn,
-                                                                                                          meta_state])
+                                                                                                         chat_test_btn,
+                                                                                                         meta_state])
       chat_test_btn.click(fn=chat_test, inputs=[model_id_input, output_box], outputs=[output_box, register_btn])
       register_btn.click(fn=register_model, inputs=[meta_state, reg_weight_class_radio, description_input,
                                                     output_box], outputs=[output_box, meta_state, test_btn,
