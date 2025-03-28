@@ -1,7 +1,10 @@
 import logging
 import unittest
 
+from bson import ObjectId
+
 from indiebot_arena.dao.mongo_dao import MongoDAO
+from indiebot_arena.model.domain_model import Model
 from indiebot_arena.service.arena_service import ArenaService
 
 
@@ -61,11 +64,9 @@ class TestArenaService(unittest.TestCase):
 
     model_a, model_b = self.arena_service.get_two_random_models(language, weight_class)
 
-    from indie_bot_arena.model.domain_model import Model
     self.assertIsInstance(model_a, Model)
     self.assertIsInstance(model_b, Model)
 
-    from bson import ObjectId
     self.assertIsInstance(model_a._id, ObjectId)
     self.assertIsInstance(model_b._id, ObjectId)
 
