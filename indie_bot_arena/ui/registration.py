@@ -32,7 +32,7 @@ def get_model_info(model_id):
     total_size_gb = total_size / (1024 ** 3)
     model_type = type(model).__name__
     quant_config = getattr(config, 'quantization_config', {})
-    quant_method = quant_config.get('quant_method', 'None')
+    quant_method = quant_config.get('quant_method', 'none')
     info = {
       "Model ID": model_id,
       "Architecture": config.architectures,
@@ -56,13 +56,51 @@ def registration_content(dao, language):
     data = []
     for m in models:
       created_at_str = m.created_at.strftime("%Y-%m-%d %H:%M:%S") if m.created_at else ""
-      data.append([m.language, m.weight_class, m.model_name, m.runtime, m.quantization, m.file_format, m.file_size_gb,
-                   m.description or "", created_at_str])
+      data.append([
+        m.language,
+        m.weight_class,
+        m.model_name,
+        m.runtime,
+        m.quantization,
+        m.file_format,
+        m.file_size_gb,
+        m.description or "",
+        created_at_str
+      ])
     return data
 
-  def test_model(model_id, current_output):
-    result = get_model_info(model_id)
-    return (current_output + "\n" + result) if current_output else result
+  def test_model(model_id, weight_class, current_output):
+    info = get_model_info(model_id)
+    if info.startswith("Error:"):
+      return (current_output + "\n" + info, gr.update(interactive=False))
+    meta_dict = {}
+    for line in info.splitlines():
+      parts = line.split(":", 1)
+      if len(parts)==2:
+        meta_dict[parts[0].strip()] = parts[1].strip()
+    if "Weights File Size" not in meta_dict:
+      err = "Error: Weights File Size not found."
+      return (current_output + "\n" + err, gr.update(interactive=False))
+    try:
+      size_str = meta_dict["Weights File Size"]
+      file_size = float(size_str.replace("GB", "").strip())
+    except Exception as e:
+      err = f"Error: Invalid file size format: {size_str}"
+      return (current_output + "\n" + err, gr.update(interactive=False))
+    if weight_class=="U-4GB" and file_size >= 4.0:
+      err = "Error: File size exceeds U-4GB limit."
+      return (current_output + "\n" + err, gr.update(interactive=False))
+    if weight_class=="U-8GB" and file_size >= 8.0:
+      err = "Error: File size exceeds U-8GB limit."
+      return (current_output + "\n" + err, gr.update(interactive=False))
+    if "Weights Format" not in meta_dict or "safetensors" not in meta_dict["Weights Format"].lower():
+      err = "Error: Weights Format must include safetensors."
+      return (current_output + "\n" + err, gr.update(interactive=False))
+    if "Quantization" not in meta_dict or meta_dict["Quantization"].lower() not in ["bitsandbytes", "none"]:
+      err = "Error: Quantization must be bitsandbytes or none."
+      return (current_output + "\n" + err, gr.update(interactive=False))
+    # メタ情報にロードテスト完了メッセージを追記して返す
+    return (current_output + "\n" + info + "\nロードテストが完了しました。", gr.update(interactive=True))
 
   def register_model(current_output, weight_class, description):
     try:
@@ -86,17 +124,20 @@ def registration_content(dao, language):
       parameters = meta_dict.get("Parameters", "")
       desc = description if description else f"Architecture: {architecture}, Model Type: {model_type}, Parameters: {parameters}"
       arena_service.register_model(language, weight_class, model_id_extracted, "transformers", quantization, file_format, file_size_gb, desc)
-      result = "登録完了"
+      result = "モデルの登録が完了しました。"
     except Exception as e:
       result = f"エラー: {str(e)}"
-    return (current_output + "\n" + result) if current_output else result
+    return (current_output + "\n" + result)
 
   with gr.Blocks(css="style.css") as ui:
     gr.Markdown(DESCRIPTION)
     weight_class_radio = gr.Radio(choices=["U-4GB", "U-8GB"], label="Weight Class", value="U-4GB")
     mdl_list = gr.Dataframe(
-      headers=["Language", "Weight Class", "Model Name", "Runtime", "Quantization", "File Format", "File Size (GB)",
-               "Description", "Created At"],
+      headers=[
+        "Language", "Weight Class", "Model Name", "Runtime",
+        "Quantization", "Weights Format", "Weights File Size",
+        "Description", "Created At"
+      ],
       value=fetch_models("U-4GB"),
       interactive=False
     )
@@ -105,13 +146,20 @@ def registration_content(dao, language):
       model_id_input = gr.Textbox(label="モデルID", max_lines=1)
       reg_weight_class_radio = gr.Radio(choices=["U-4GB", "U-8GB"], label="Weight Class", value="U-4GB")
       description_input = gr.Textbox(label="Description (オプション)", placeholder="任意の説明を入力", max_lines=1)
-      output_box = gr.Textbox(label="Meta情報 / 登録結果", lines=10)
+      output_box = gr.Textbox(label="結果出力", lines=10)
       with gr.Row():
         test_btn = gr.Button("ロードテスト")
-        register_btn = gr.Button("モデル登録")
+        register_btn = gr.Button("モデル登録", interactive=False)
         clear_btn = gr.Button("クリア")
-      test_btn.click(fn=test_model, inputs=[model_id_input, output_box], outputs=output_box)
-      register_btn.click(fn=register_model, inputs=[output_box, reg_weight_class_radio,
-                                                    description_input], outputs=output_box)
+      test_btn.click(
+        fn=test_model,
+        inputs=[model_id_input, reg_weight_class_radio, output_box],
+        outputs=[output_box, register_btn]
+      )
+      register_btn.click(
+        fn=register_model,
+        inputs=[output_box, reg_weight_class_radio, description_input],
+        outputs=output_box
+      )
       clear_btn.click(fn=lambda: "", inputs=[], outputs=output_box)
   return ui
