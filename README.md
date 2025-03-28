@@ -1,1 +1,1 @@
-# indie-bot-arena
+# IndieBot Arena
