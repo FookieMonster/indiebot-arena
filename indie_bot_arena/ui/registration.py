@@ -60,18 +60,19 @@ def registration_content(dao, language):
                    m.description or "", created_at_str])
     return data
 
-  def test_model(model_id):
-    return get_model_info(model_id)
+  def test_model(model_id, current_output):
+    result = get_model_info(model_id)
+    return (current_output + "\n" + result) if current_output else result
 
-  def register_model(meta_info, weight_class, description):
+  def register_model(current_output, weight_class, description):
     try:
-      lines = meta_info.splitlines()
+      lines = current_output.splitlines()
       meta_dict = {}
       for line in lines:
         parts = line.split(":", 1)
         if len(parts)==2:
           meta_dict[parts[0].strip()] = parts[1].strip()
-      model_id = meta_dict.get("Model ID")
+      model_id_extracted = meta_dict.get("Model ID")
       weights_file_size_str = meta_dict.get("Weights File Size", "0 GB")
       try:
         file_size_gb = float(weights_file_size_str.replace("GB", "").strip())
@@ -84,10 +85,11 @@ def registration_content(dao, language):
       model_type = meta_dict.get("Model Type", "")
       parameters = meta_dict.get("Parameters", "")
       desc = description if description else f"Architecture: {architecture}, Model Type: {model_type}, Parameters: {parameters}"
-      arena_service.register_model(language, weight_class, model_id, "transformers", quantization, file_format, file_size_gb, desc)
-      return "登録完了"
+      arena_service.register_model(language, weight_class, model_id_extracted, "transformers", quantization, file_format, file_size_gb, desc)
+      result = "登録完了"
     except Exception as e:
-      return f"エラー: {str(e)}"
+      result = f"エラー: {str(e)}"
+    return (current_output + "\n" + result) if current_output else result
 
   with gr.Blocks(css="style.css") as ui:
     gr.Markdown(DESCRIPTION)
@@ -99,14 +101,17 @@ def registration_content(dao, language):
       interactive=False
     )
     weight_class_radio.change(fn=fetch_models, inputs=weight_class_radio, outputs=mdl_list)
-    with gr.Accordion("モデル登録", open=False):
+    with gr.Accordion("モデルの登録", open=False):
       model_id_input = gr.Textbox(label="モデルID", max_lines=1)
+      reg_weight_class_radio = gr.Radio(choices=["U-4GB", "U-8GB"], label="Weight Class", value="U-4GB")
       description_input = gr.Textbox(label="Description (オプション)", placeholder="任意の説明を入力", max_lines=1)
-      test_btn = gr.Button("テスト")
-      meta_info_box = gr.Textbox(label="Meta情報", lines=10)
-      register_btn = gr.Button("登録")
-      result_txt = gr.Textbox(label="結果")
-      test_btn.click(fn=test_model, inputs=model_id_input, outputs=meta_info_box)
-      register_btn.click(fn=register_model, inputs=[meta_info_box, weight_class_radio,
-                                                    description_input], outputs=result_txt)
+      output_box = gr.Textbox(label="Meta情報 / 登録結果", lines=10)
+      with gr.Row():
+        test_btn = gr.Button("ロードテスト")
+        register_btn = gr.Button("モデル登録")
+        clear_btn = gr.Button("クリア")
+      test_btn.click(fn=test_model, inputs=[model_id_input, output_box], outputs=output_box)
+      register_btn.click(fn=register_model, inputs=[output_box, reg_weight_class_radio,
+                                                    description_input], outputs=output_box)
+      clear_btn.click(fn=lambda: "", inputs=[], outputs=output_box)
   return ui
