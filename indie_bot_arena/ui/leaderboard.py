@@ -3,6 +3,8 @@ import pandas as pd
 
 from indie_bot_arena.service.arena_service import ArenaService
 
+DESCRIPTION = "# リーダーボード"
+
 
 def leaderboard_content(dao, language):
   arena_service = ArenaService(dao)
@@ -24,8 +26,8 @@ def leaderboard_content(dao, language):
     return df
 
   initial_weight_class = "U-4GB"
-  with gr.Blocks() as leaderboard_ui:
-    gr.Markdown("## Leaderboard (Language: ja)")
+  with gr.Blocks(css="style.css") as leaderboard_ui:
+    gr.Markdown(DESCRIPTION)
     weight_class_radio = gr.Radio(choices=["U-4GB", "U-8GB"], label="Weight Class", value=initial_weight_class)
     leaderboard_table = gr.Dataframe(
       headers=["Rank", "Model Name", "Elo Score", "File Size (GB)", "Description", "Last Updated"],

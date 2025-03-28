@@ -23,7 +23,7 @@ with gr.Blocks(css=custom_css) as demo:
   with gr.Tabs():
     with gr.TabItem("リーダーボード"):
       leaderboard_content(dao, LANGUAGE)
-    with gr.TabItem("チャットバトル"):
+    with gr.TabItem("モデルに投票"):
       battle_content(dao, LANGUAGE)
     with gr.TabItem("モデルの登録"):
       registration_content(dao, LANGUAGE)

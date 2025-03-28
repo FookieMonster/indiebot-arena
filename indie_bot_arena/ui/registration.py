@@ -4,6 +4,8 @@ import torch
 from huggingface_hub import hf_hub_url, get_hf_file_metadata, model_info
 from transformers import AutoTokenizer, AutoModelForCausalLM, AutoConfig
 
+DESCRIPTION = "# 登録済みモデル"
+
 
 @spaces.GPU(duration=30)
 def get_model_info(model_id):
@@ -87,8 +89,8 @@ def registration_content(dao, language):
     except Exception as e:
       return f"エラー: {str(e)}"
 
-  with gr.Blocks() as ui:
-    gr.Markdown("## 登録済みモデル (Language: " + language + ")")
+  with gr.Blocks(css="style.css") as ui:
+    gr.Markdown(DESCRIPTION)
     weight_class_radio = gr.Radio(choices=["U-4GB", "U-8GB"], label="Weight Class", value="U-4GB")
     mdl_list = gr.Dataframe(
       headers=["Language", "Weight Class", "Model Name", "Runtime", "Quantization", "File Format", "File Size (GB)",

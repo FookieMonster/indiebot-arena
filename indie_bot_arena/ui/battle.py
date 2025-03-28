@@ -8,7 +8,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 
 from indie_bot_arena.service.arena_service import ArenaService
 
-DESCRIPTION = "# Chat Battle"
+DESCRIPTION = "# チャットバトル"
 MAX_INPUT_TOKEN_LENGTH = int(os.getenv("MAX_INPUT_TOKEN_LENGTH", "4096"))
 
 
