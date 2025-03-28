@@ -68,7 +68,7 @@ def submit_message(message, history_a, history_b, model_a, model_b):
 
 def battle_content(dao, language):
   arena_service = ArenaService(dao)
-  default_weight = "U-8GB"
+  default_weight = "U-4GB"
   initial_models = arena_service.get_model_dropdown_list(language, default_weight)
   initial_choices = [m["label"] for m in initial_models] if initial_models else []
 
