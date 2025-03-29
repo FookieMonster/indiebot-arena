@@ -106,7 +106,12 @@ def battle_content(dao, language):
 
   def handle_vote(vote_choice, weight_class, model_a_name, model_b_name):
     msg = submit_vote(vote_choice, weight_class, model_a_name, model_b_name)
-    return msg, gr.update(interactive=False), gr.update(interactive=False)
+    return (
+      gr.update(value=msg, visible=True),  # vote_message を更新して表示
+      gr.update(interactive=False),  # vote_a_btn を非活性化
+      gr.update(interactive=False),  # vote_b_btn を非活性化
+      gr.update(visible=False)  # user_input を非表示に
+    )
 
   with gr.Blocks(css="style.css") as battle_ui:
     gr.Markdown(DESCRIPTION)
@@ -125,7 +130,7 @@ def battle_content(dao, language):
       vote_a_btn = gr.Button("A is better", interactive=False)
       vote_b_btn = gr.Button("B is better", interactive=False)
     user_input = gr.Textbox(label="Your Message", submit_btn=True)
-    vote_message = gr.Textbox(label="Vote Status", interactive=False)
+    vote_message = gr.Textbox(label="Vote Status", interactive=False, visible=False)
     user_input.submit(
       fn=submit_message,
       inputs=[user_input, chatbot_a, chatbot_b, model_dropdown_a, model_dropdown_b],
@@ -134,11 +139,11 @@ def battle_content(dao, language):
     vote_a_btn.click(
       fn=lambda weight, a, b: handle_vote("Chatbot A", weight, a, b),
       inputs=[weight_class_radio, model_dropdown_a, model_dropdown_b],
-      outputs=[vote_message, vote_a_btn, vote_b_btn]
+      outputs=[vote_message, vote_a_btn, vote_b_btn, user_input]
     )
     vote_b_btn.click(
       fn=lambda weight, a, b: handle_vote("Chatbot B", weight, a, b),
       inputs=[weight_class_radio, model_dropdown_a, model_dropdown_b],
-      outputs=[vote_message, vote_a_btn, vote_b_btn]
+      outputs=[vote_message, vote_a_btn, vote_b_btn, user_input]
     )
   return battle_ui
