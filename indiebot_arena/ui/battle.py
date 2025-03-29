@@ -108,8 +108,8 @@ def battle_content(dao, language):
     msg = submit_vote(vote_choice, weight_class, model_a_name, model_b_name)
     return (
       gr.update(value=msg, visible=True),  # vote_message を更新して表示
-      gr.update(interactive=False),  # vote_a_btn を非活性化
-      gr.update(interactive=False),  # vote_b_btn を非活性化
+      gr.update(interactive=False, value=model_a_name),  # vote_a_btn のラベルを model_a_name に更新
+      gr.update(interactive=False, value=model_b_name),  # vote_b_btn のラベルを model_b_name に更新
       gr.update(visible=False)  # user_input を非表示に
     )
 
