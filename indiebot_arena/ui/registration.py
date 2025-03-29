@@ -77,7 +77,7 @@ def registration_content(dao, language):
     data = []
     for m in models:
       created_at_str = m.created_at.strftime("%Y-%m-%d %H:%M:%S") if m.created_at else ""
-      data.append([m.language, m.weight_class, m.model_name, m.runtime, m.quantization, m.file_format, m.file_size_gb,
+      data.append([m.weight_class, m.model_name, m.runtime, m.quantization, m.file_format, m.file_size_gb,
                    m.description or "", created_at_str])
     return data
 
@@ -144,7 +144,7 @@ def registration_content(dao, language):
     gr.Markdown(DESCRIPTION)
     weight_class_radio = gr.Radio(choices=["U-5GB", "U-10GB"], label="Weight Class", value="U-5GB")
     mdl_list = gr.Dataframe(
-      headers=["Language", "Weight Class", "Model Name", "Runtime", "Quantization", "Weights Format",
+      headers=["Weight Class", "Model Name", "Runtime", "Quantization", "Weights Format",
                "Weights File Size", "Description", "Created At"],
       value=fetch_models("U-5GB"),
       interactive=False

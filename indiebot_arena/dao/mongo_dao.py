@@ -56,7 +56,7 @@ class MongoDAO:
       "language": language,
       "weight_class": weight_class
     }
-    cursor = self.models_collection.find(query)
+    cursor = self.models_collection.find(query).sort("_id", 1)
     return [Model(**doc) for doc in cursor]
 
   def find_one_model(self, language: str, weight_class: str, model_name: str) -> Optional[Model]:
