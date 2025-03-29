@@ -86,10 +86,10 @@ def registration_content(dao, language):
     if isinstance(meta, str) and meta.startswith("Error:"):
       return (current_output + "\n" + meta, gr.update(interactive=False), None)
     if weight_class=="U-4GB" and meta.weights_file_size >= 4.0:
-      err = "Error: File size exceeds U-4GB limit."
+      err = f"Error: File size exceeds U-4GB limit. {meta.weights_file_size} GB"
       return (current_output + "\n" + err, gr.update(interactive=False), None)
     if weight_class=="U-8GB" and meta.weights_file_size >= 8.0:
-      err = "Error: File size exceeds U-8GB limit."
+      err = f"Error: File size exceeds U-8GB limit. {meta.weights_file_size} GB"
       return (current_output + "\n" + err, gr.update(interactive=False), None)
     if "safetensors" not in meta.weights_format.lower():
       err = "Error: Weights Format must include safetensors."
