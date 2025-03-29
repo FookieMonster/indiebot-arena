@@ -1,5 +1,6 @@
 import concurrent.futures
 import os
+import threading
 
 import gradio as gr
 import spaces
@@ -9,19 +10,31 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 from indiebot_arena.service.arena_service import ArenaService
 
 DESCRIPTION = "# チャットバトル"
+MAX_NEW_TOKENS = 20
 MAX_INPUT_TOKEN_LENGTH = int(os.getenv("MAX_INPUT_TOKEN_LENGTH", "4096"))
+
+_model_cache = {}
+_model_lock = threading.Lock()
+
+
+def get_cached_model_and_tokenizer(model_id: str):
+  with _model_lock:
+    if model_id not in _model_cache:
+      tokenizer = AutoTokenizer.from_pretrained(model_id)
+      model = AutoModelForCausalLM.from_pretrained(
+        model_id,
+        device_map="auto",
+        torch_dtype=torch.bfloat16,
+      )
+      model.eval()
+      _model_cache[model_id] = (model, tokenizer)
+    return _model_cache[model_id]
 
 
 @spaces.GPU(duration=30)
-def generate(message: str, chat_history: list, model_id: str, max_new_tokens: int = 1024,
+def generate(message: str, chat_history: list, model_id: str, max_new_tokens: int = MAX_NEW_TOKENS,
              temperature: float = 0.6, top_p: float = 0.9, top_k: int = 50, repetition_penalty: float = 1.2) -> str:
-  tokenizer = AutoTokenizer.from_pretrained(model_id)
-  model = AutoModelForCausalLM.from_pretrained(
-    model_id,
-    device_map="auto",
-    torch_dtype=torch.bfloat16,
-  )
-  model.eval()
+  model, tokenizer = get_cached_model_and_tokenizer(model_id)
   conversation = chat_history.copy()
   conversation.append({"role": "user", "content": message})
   input_ids = tokenizer.apply_chat_template(conversation, add_generation_prompt=True, return_tensors="pt")
@@ -107,9 +120,8 @@ def battle_content(dao, language):
     with gr.Row():
       chatbot_a = gr.Chatbot(label="Chatbot A")
       chatbot_b = gr.Chatbot(label="Chatbot B")
-    user_input = gr.Textbox(label="Your Message")
-    submit_msg_btn = gr.Button("Submit Message")
-    submit_msg_btn.click(
+    user_input = gr.Textbox(label="Your Message", submit_btn=True)
+    user_input.submit(
       fn=submit_message,
       inputs=[user_input, chatbot_a, chatbot_b, model_dropdown_a, model_dropdown_b],
       outputs=[chatbot_a, chatbot_b, user_input]
