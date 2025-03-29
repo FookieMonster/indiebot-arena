@@ -6,6 +6,9 @@ import torch
 from huggingface_hub import hf_hub_url, get_hf_file_metadata, model_info
 from transformers import AutoTokenizer, AutoModelForCausalLM, AutoConfig
 
+from indiebot_arena.service.arena_service import ArenaService
+from indiebot_arena.ui.battle import generate
+
 DESCRIPTION = "# 登録済みモデル"
 
 
@@ -67,8 +70,6 @@ def get_model_meta(model_id: str):
 
 
 def registration_content(dao, language):
-  from indiebot_arena.service.arena_service import ArenaService
-  from indiebot_arena.ui.battle import generate
   arena_service = ArenaService(dao)
 
   def fetch_models(weight_class):
