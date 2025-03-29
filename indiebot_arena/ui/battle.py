@@ -76,7 +76,7 @@ def submit_message(message, history_a, history_b, model_a, model_b):
     response_b = future_b.result()
   history_a[-1] = (message, response_a)
   history_b[-1] = (message, response_b)
-  return history_a, history_b, ""
+  return history_a, history_b, "", gr.update(interactive=True), gr.update(interactive=True)
 
 
 def battle_content(dao, language):
@@ -104,6 +104,10 @@ def battle_content(dao, language):
     except Exception as e:
       return f"Error recording vote: {e}"
 
+  def handle_vote(vote_choice, weight_class, model_a_name, model_b_name):
+    msg = submit_vote(vote_choice, weight_class, model_a_name, model_b_name)
+    return msg, gr.update(interactive=False), gr.update(interactive=False)
+
   with gr.Blocks(css="style.css") as battle_ui:
     gr.Markdown(DESCRIPTION)
     weight_class_radio = gr.Radio(choices=["U-4GB", "U-8GB"], label="Select Weight Class", value=default_weight)
@@ -112,31 +116,29 @@ def battle_content(dao, language):
         0] if initial_choices else "")
       model_dropdown_b = gr.Dropdown(choices=initial_choices, label="Select Model B", value=initial_choices[
         0] if initial_choices else "")
-    weight_class_radio.change(
-      fn=fetch_model_dropdown,
-      inputs=weight_class_radio,
-      outputs=[model_dropdown_a, model_dropdown_b]
-    )
+    weight_class_radio.change(fn=fetch_model_dropdown, inputs=weight_class_radio, outputs=[model_dropdown_a,
+                                                                                           model_dropdown_b])
     with gr.Row():
       chatbot_a = gr.Chatbot(label="Chatbot A")
       chatbot_b = gr.Chatbot(label="Chatbot B")
+    with gr.Row():
+      vote_a_btn = gr.Button("A is better", interactive=False)
+      vote_b_btn = gr.Button("B is better", interactive=False)
     user_input = gr.Textbox(label="Your Message", submit_btn=True)
+    vote_message = gr.Textbox(label="Vote Status", interactive=False)
     user_input.submit(
       fn=submit_message,
       inputs=[user_input, chatbot_a, chatbot_b, model_dropdown_a, model_dropdown_b],
-      outputs=[chatbot_a, chatbot_b, user_input]
+      outputs=[chatbot_a, chatbot_b, user_input, vote_a_btn, vote_b_btn]
     )
-    with gr.Row():
-      vote_a_btn = gr.Button("A is better")
-      vote_b_btn = gr.Button("B is better")
     vote_a_btn.click(
-      fn=lambda weight, a, b: submit_vote("Chatbot A", weight, a, b),
+      fn=lambda weight, a, b: handle_vote("Chatbot A", weight, a, b),
       inputs=[weight_class_radio, model_dropdown_a, model_dropdown_b],
-      outputs=[]
+      outputs=[vote_message, vote_a_btn, vote_b_btn]
     )
     vote_b_btn.click(
-      fn=lambda weight, a, b: submit_vote("Chatbot B", weight, a, b),
+      fn=lambda weight, a, b: handle_vote("Chatbot B", weight, a, b),
       inputs=[weight_class_radio, model_dropdown_a, model_dropdown_b],
-      outputs=[]
+      outputs=[vote_message, vote_a_btn, vote_b_btn]
     )
   return battle_ui
