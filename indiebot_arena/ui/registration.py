@@ -85,11 +85,11 @@ def registration_content(dao, language):
     meta = get_model_meta(model_id)
     if isinstance(meta, str) and meta.startswith("Error:"):
       return (current_output + "\n" + meta, gr.update(interactive=False), None)
-    if weight_class=="U-4GB" and meta.weights_file_size >= 4.0:
-      err = f"Error: File size exceeds U-4GB limit. {meta.weights_file_size} GB"
+    if weight_class=="U-5GB" and meta.weights_file_size >= 5.0:
+      err = f"Error: File size exceeds U-5GB limit. {meta.weights_file_size} GB"
       return (current_output + "\n" + err, gr.update(interactive=False), None)
-    if weight_class=="U-8GB" and meta.weights_file_size >= 8.0:
-      err = f"Error: File size exceeds U-8GB limit. {meta.weights_file_size} GB"
+    if weight_class=="U-10GB" and meta.weights_file_size >= 10.0:
+      err = f"Error: File size exceeds U-10GB limit. {meta.weights_file_size} GB"
       return (current_output + "\n" + err, gr.update(interactive=False), None)
     if "safetensors" not in meta.weights_format.lower():
       err = "Error: Weights Format must include safetensors."
@@ -137,22 +137,22 @@ def registration_content(dao, language):
     return new_output, meta, btn_update, btn_update, btn_update
 
   def clear_all():
-    initial_weight = "U-4GB"
+    initial_weight = "U-5GB"
     return "", initial_weight, "", "", gr.update(interactive=True), gr.update(interactive=False), gr.update(interactive=False), None
 
   with gr.Blocks(css="style.css") as ui:
     gr.Markdown(DESCRIPTION)
-    weight_class_radio = gr.Radio(choices=["U-4GB", "U-8GB"], label="Weight Class", value="U-4GB")
+    weight_class_radio = gr.Radio(choices=["U-5GB", "U-10GB"], label="Weight Class", value="U-5GB")
     mdl_list = gr.Dataframe(
       headers=["Language", "Weight Class", "Model Name", "Runtime", "Quantization", "Weights Format",
                "Weights File Size", "Description", "Created At"],
-      value=fetch_models("U-4GB"),
+      value=fetch_models("U-5GB"),
       interactive=False
     )
     weight_class_radio.change(fn=fetch_models, inputs=weight_class_radio, outputs=mdl_list)
     with gr.Accordion("モデルの登録", open=False):
       model_id_input = gr.Textbox(label="モデルID", max_lines=1)
-      reg_weight_class_radio = gr.Radio(choices=["U-4GB", "U-8GB"], label="Weight Class", value="U-4GB")
+      reg_weight_class_radio = gr.Radio(choices=["U-5GB", "U-10GB"], label="Weight Class", value="U-5GB")
       description_input = gr.Textbox(label="Description (オプション)", placeholder="任意の説明を入力", max_lines=1)
       output_box = gr.Textbox(label="結果出力", lines=10)
       meta_state = gr.State(None)

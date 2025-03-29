@@ -81,7 +81,7 @@ def submit_message(message, history_a, history_b, model_a, model_b):
 
 def battle_content(dao, language):
   arena_service = ArenaService(dao)
-  default_weight = "U-4GB"
+  default_weight = "U-5GB"
   initial_models = arena_service.get_model_dropdown_list(language, default_weight)
   initial_choices = [m["label"] for m in initial_models] if initial_models else []
 
@@ -115,7 +115,7 @@ def battle_content(dao, language):
 
   with gr.Blocks(css="style.css") as battle_ui:
     gr.Markdown(DESCRIPTION)
-    weight_class_radio = gr.Radio(choices=["U-4GB", "U-8GB"], label="Select Weight Class", value=default_weight)
+    weight_class_radio = gr.Radio(choices=["U-5GB", "U-10GB"], label="Select Weight Class", value=default_weight)
     with gr.Row():
       model_dropdown_a = gr.Dropdown(choices=initial_choices, label="Select Model A", value=initial_choices[
         0] if initial_choices else "")

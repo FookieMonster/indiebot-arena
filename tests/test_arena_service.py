@@ -21,7 +21,7 @@ class TestArenaService(unittest.TestCase):
 
   def test_register_and_get_model(self):
     language = "ja"
-    weight_class = "U-4GB"
+    weight_class = "U-5GB"
     model_name = "testuser/test-model"
     runtime = "transformers"
     quantization = "bnb"
@@ -47,7 +47,7 @@ class TestArenaService(unittest.TestCase):
 
   def test_get_two_random_models(self):
     language = "ja"
-    weight_class = "U-4GB"
+    weight_class = "U-5GB"
     model_names = ["testuser/model1", "testuser/model2", "testuser/model3"]
 
     for name in model_names:
@@ -74,7 +74,7 @@ class TestArenaService(unittest.TestCase):
 
   def test_get_model_dropdown_list(self):
     language = "en"
-    weight_class = "U-8GB"
+    weight_class = "U-10GB"
     model_names = ["user/modelA", "user/modelB"]
 
     for name in model_names:
@@ -100,7 +100,7 @@ class TestArenaService(unittest.TestCase):
     2つのモデルでバトルを記録し、リーダーボードの更新が正しく行われるかテストする
     """
     language = "ja"
-    weight_class = "U-4GB"
+    weight_class = "U-5GB"
 
     # 2つのモデルを登録
     model1_id = self.arena_service.register_model(

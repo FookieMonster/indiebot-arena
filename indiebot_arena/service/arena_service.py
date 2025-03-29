@@ -48,14 +48,14 @@ class ArenaService:
       raise ValueError("File format must be 'safetensors'.")
     if language not in ("ja", "en"):
       raise ValueError("Language must be 'ja' or 'en'.")
-    if weight_class not in ("U-4GB", "U-8GB"):
-      raise ValueError("Weight class must be 'U-4GB' or 'U-8GB'.")
+    if weight_class not in ("U-5GB", "U-10GB"):
+      raise ValueError("Weight class must be 'U-5GB' or 'U-10GB'.")
     if file_size_gb <= 0:
       raise ValueError("File size must be greater than 0.")
-    if weight_class=="U-4GB" and file_size_gb >= 4.0:
-      raise ValueError("For U-4GB, file size must be less than 4.0.")
-    if weight_class=="U-8GB" and file_size_gb >= 8.0:
-      raise ValueError("For U-8GB, file size must be less than 8.0.")
+    if weight_class=="U-5GB" and file_size_gb >= 5.0:
+      raise ValueError("For U-5GB, file size must be less than 5.0.")
+    if weight_class=="U-10GB" and file_size_gb >= 10.0:
+      raise ValueError("For U-10GB, file size must be less than 10.0.")
     if not re.match(r"^[^/]+/[^/]+$", model_name):
       raise ValueError("Model name must be in 'xxxxx/xxxxxx' format.")
 
@@ -122,8 +122,8 @@ class ArenaService:
     # Validation
     if language not in ("ja", "en"):
       raise ValueError("Language must be 'ja' or 'en'.")
-    if weight_class not in ("U-4GB", "U-8GB"):
-      raise ValueError("Weight class must be 'U-4GB' or 'U-8GB'.")
+    if weight_class not in ("U-5GB", "U-10GB"):
+      raise ValueError("Weight class must be 'U-5GB' or 'U-10GB'.")
 
     if model_a_id is None or model_b_id is None or winner_model_id is None:
       raise ValueError("All model IDs must be provided.")

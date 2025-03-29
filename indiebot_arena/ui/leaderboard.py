@@ -25,10 +25,10 @@ def leaderboard_content(dao, language):
     df.insert(0, "Rank", range(1, len(df) + 1))
     return df
 
-  initial_weight_class = "U-4GB"
+  initial_weight_class = "U-5GB"
   with gr.Blocks(css="style.css") as leaderboard_ui:
     gr.Markdown(DESCRIPTION)
-    weight_class_radio = gr.Radio(choices=["U-4GB", "U-8GB"], label="Weight Class", value=initial_weight_class)
+    weight_class_radio = gr.Radio(choices=["U-5GB", "U-10GB"], label="Weight Class", value=initial_weight_class)
     leaderboard_table = gr.Dataframe(
       headers=["Rank", "Model Name", "Elo Score", "File Size (GB)", "Description", "Last Updated"],
       value=fetch_leaderboard_data(initial_weight_class),

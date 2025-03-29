@@ -8,7 +8,7 @@ from bson import ObjectId
 @dataclass
 class Model:
   language: str               # 言語区分 (例: "ja", "en")
-  weight_class: str           # サイズ区分 (例: "U-8GB", "U-4GB")
+  weight_class: str           # サイズ区分 (例: "U-5GB", "U-10GB")
   model_name: str             # 例: "fukugawa/gemma-2-9b-finetuned-bnb-4bit"
   runtime: str                # 実行環境 (例: "transformers", "llama.cpp")
   quantization: str           # 量子化方式 (例: "none", "bnb", "gptq")
