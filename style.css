@@ -9,3 +9,8 @@ h1 {
   background: #1565c0;
   border-radius: 100vh;
 }
+
+#next_battle_btn {
+  margin-top: auto;
+  height: 4rem;
+}

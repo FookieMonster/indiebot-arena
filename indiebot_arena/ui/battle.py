@@ -144,10 +144,12 @@ def battle_content(dao, language):
     with gr.Row():
       vote_a_btn = gr.Button("A is better", interactive=False)
       vote_b_btn = gr.Button("B is better", interactive=False)
-    user_input = gr.Textbox(label="Your Message", submit_btn=True)
+    user_input = gr.Textbox(placeholder="日本語でメッセージを入力...", value="日本の首都は？", submit_btn=True, show_label=False)
     with gr.Row():
-      vote_message = gr.Textbox(label="Vote Status", interactive=False, visible=False)
-      next_battle_btn = gr.Button("Next Battle", interactive=False, visible=False)
+      with gr.Column(scale=3):
+        vote_message = gr.Textbox(show_label=False, interactive=False, visible=False)
+      with gr.Column(scale=1):
+        next_battle_btn = gr.Button("Next Battle", interactive=False, visible=False, elem_id="next_battle_btn")
     user_input.submit(
       fn=submit_message,
       inputs=[user_input, chatbot_a, chatbot_b, model_dropdown_a, model_dropdown_b],
