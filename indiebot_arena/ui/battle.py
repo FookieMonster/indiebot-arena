@@ -90,8 +90,9 @@ def battle_content(dao, language):
   def fetch_model_dropdown(weight_class):
     models = arena_service.get_model_dropdown_list(language, weight_class)
     model_labels = [m["label"] for m in models] if models else []
-    update_obj = gr.update(choices=model_labels, value=model_labels[0] if model_labels else "")
-    return update_obj, update_obj
+    update_obj_a = gr.update(choices=model_labels, value=model_labels[0] if model_labels else "")
+    update_obj_b = gr.update(choices=model_labels, value=model_labels[0] if model_labels else "")
+    return update_obj_a, update_obj_b
 
   def submit_vote(vote_choice, weight_class, model_a_name, model_b_name):
     model_a = arena_service.get_one_model(language, weight_class, model_a_name)
