@@ -82,18 +82,24 @@ def submit_message(message, history_a, history_b, model_a, model_b):
   return history_a, history_b, "", gr.update(interactive=True), gr.update(interactive=True)
 
 
+def get_random_values(model_labels):
+  if MODEL_SELECTION_MODE=="random":
+    return random.sample(model_labels, 2)
+  if MODEL_SELECTION_MODE=="manual":
+    return model_labels[0], model_labels[0]
+
 def battle_content(dao, language):
   arena_service = ArenaService(dao)
   default_weight = "U-5GB"
   initial_models = arena_service.get_model_dropdown_list(language, default_weight)
   initial_choices = [m["label"] for m in initial_models]
-  initial_value_a, initial_value_b = random.sample(initial_choices, 2)
-  dropdown_visible = False if MODEL_SELECTION_MODE == "random" else True
+  initial_value_a, initial_value_b = get_random_values(initial_choices)
+  dropdown_visible = False if MODEL_SELECTION_MODE=="random" else True
 
   def fetch_model_dropdown(weight_class):
     models = arena_service.get_model_dropdown_list(language, weight_class)
     model_labels = [m["label"] for m in models]
-    value_a, value_b = random.sample(model_labels, 2)
+    value_a, value_b = get_random_values(model_labels)
     update_obj_a = gr.update(choices=model_labels, value=value_a)
     update_obj_b = gr.update(choices=model_labels, value=value_b)
     return update_obj_a, update_obj_b, model_labels
@@ -120,7 +126,7 @@ def battle_content(dao, language):
     )
 
   def reset_battle(dropdown_options):
-    value_a, value_b = random.sample(dropdown_options, 2)
+    value_a, value_b = get_random_values(dropdown_options)
     return (
       [],  # chatbot_aのリセット
       [],  # chatbot_bのリセット
