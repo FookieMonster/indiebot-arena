@@ -7,10 +7,11 @@ import spaces
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
+from indiebot_arena.config import LOCAL_TESTING
 from indiebot_arena.service.arena_service import ArenaService
 
 DESCRIPTION = "# チャットバトル"
-MAX_NEW_TOKENS = 20
+MAX_NEW_TOKENS = 100
 MAX_INPUT_TOKEN_LENGTH = int(os.getenv("MAX_INPUT_TOKEN_LENGTH", "4096"))
 
 _model_cache = {}
@@ -21,11 +22,7 @@ def get_cached_model_and_tokenizer(model_id: str):
   with _model_lock:
     if model_id not in _model_cache:
       tokenizer = AutoTokenizer.from_pretrained(model_id)
-      model = AutoModelForCausalLM.from_pretrained(
-        model_id,
-        device_map="auto",
-        torch_dtype=torch.bfloat16,
-      )
+      model = AutoModelForCausalLM.from_pretrained(model_id, device_map="auto", torch_dtype=torch.bfloat16)
       model.eval()
       _model_cache[model_id] = (model, tokenizer)
     return _model_cache[model_id]
@@ -34,7 +31,13 @@ def get_cached_model_and_tokenizer(model_id: str):
 @spaces.GPU(duration=30)
 def generate(message: str, chat_history: list, model_id: str, max_new_tokens: int = MAX_NEW_TOKENS,
              temperature: float = 0.6, top_p: float = 0.9, top_k: int = 50, repetition_penalty: float = 1.2) -> str:
-  model, tokenizer = get_cached_model_and_tokenizer(model_id)
+  if LOCAL_TESTING:
+    # Avoid cannot copy out of meta tensor
+    model, tokenizer = get_cached_model_and_tokenizer(model_id)
+  else:
+    tokenizer = AutoTokenizer.from_pretrained(model_id)
+    model = AutoModelForCausalLM.from_pretrained(model_id, device_map="auto", torch_dtype=torch.bfloat16)
+
   conversation = chat_history.copy()
   conversation.append({"role": "user", "content": message})
   input_ids = tokenizer.apply_chat_template(conversation, add_generation_prompt=True, return_tensors="pt")
