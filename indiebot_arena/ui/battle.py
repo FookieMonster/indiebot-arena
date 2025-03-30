@@ -7,11 +7,10 @@ import spaces
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-from indiebot_arena.config import LOCAL_TESTING
+from indiebot_arena.config import LOCAL_TESTING, MAX_NEW_TOKENS
 from indiebot_arena.service.arena_service import ArenaService
 
 DESCRIPTION = "# チャットバトル"
-MAX_NEW_TOKENS = 100
 MAX_INPUT_TOKEN_LENGTH = int(os.getenv("MAX_INPUT_TOKEN_LENGTH", "4096"))
 
 _model_cache = {}

@@ -6,3 +6,8 @@ LANGUAGE = "ja"
 
 DEBUG = os.getenv("DEBUG", "False").lower() in ["true", "1", "yes"]
 LOCAL_TESTING = os.getenv("LOCAL_TESTING", "False").lower() in ["true", "1", "yes"]
+
+if LOCAL_TESTING:
+  MAX_NEW_TOKENS = 20
+else:
+  MAX_NEW_TOKENS = 512
