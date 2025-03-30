@@ -87,7 +87,7 @@ def submit_message(message, history_a, history_b, model_a, model_b):
     response_b = future_b.result()
   history_a[-1] = (message, response_a)
   history_b[-1] = (message, response_b)
-  return history_a, history_b, "", gr.update(interactive=True), gr.update(interactive=True)
+  return history_a, history_b, "", gr.update(interactive=True), gr.update(interactive=True), gr.update(interactive=False)
 
 
 def get_random_values(model_labels):
@@ -144,7 +144,8 @@ def battle_content(dao, language):
       gr.update(visible=False),  # vote_messageの非表示
       gr.update(visible=False, interactive=False),  # next_battle_btnの非表示
       gr.update(choices=dropdown_options, value=value_a),  # model_dropdown_a更新
-      gr.update(choices=dropdown_options, value=value_b)  # model_dropdown_b更新
+      gr.update(choices=dropdown_options, value=value_b),  # model_dropdown_b更新
+      gr.update(interactive=True)  # weight_class_radio を有効化
     )
 
   with gr.Blocks(css="style.css") as battle_ui:
@@ -193,7 +194,7 @@ def battle_content(dao, language):
     user_input.submit(
       fn=submit_message,
       inputs=[user_input, chatbot_a, chatbot_b, model_dropdown_a, model_dropdown_b],
-      outputs=[chatbot_a, chatbot_b, user_input, vote_a_btn, vote_b_btn]
+      outputs=[chatbot_a, chatbot_b, user_input, vote_a_btn, vote_b_btn, weight_class_radio]
     )
     vote_a_btn.click(
       fn=lambda weight, a, b: handle_vote("Chatbot A", weight, a, b),
@@ -211,7 +212,7 @@ def battle_content(dao, language):
       outputs=[
         chatbot_a, chatbot_b, user_input, vote_a_btn,
         vote_b_btn, vote_message, next_battle_btn,
-        model_dropdown_a, model_dropdown_b
+        model_dropdown_a, model_dropdown_b, weight_class_radio
       ]
     )
   return battle_ui
