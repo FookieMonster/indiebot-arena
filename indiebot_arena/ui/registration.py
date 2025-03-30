@@ -1,3 +1,4 @@
+import os
 from dataclasses import dataclass
 
 import gradio as gr
@@ -10,6 +11,8 @@ from indiebot_arena.service.arena_service import ArenaService
 from indiebot_arena.ui.battle import generate
 
 DESCRIPTION = "# 登録済みモデル"
+base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+docs_path = os.path.join(base_dir, "docs", "model_registration_guide.md")
 
 
 @dataclass
@@ -150,7 +153,11 @@ def registration_content(dao, language):
       interactive=False
     )
     weight_class_radio.change(fn=fetch_models, inputs=weight_class_radio, outputs=mdl_list)
-    with gr.Accordion("モデルの登録", open=False):
+    with gr.Accordion("モデルの登録ガイド", open=False):
+      with open(docs_path, "r", encoding="utf-8") as f:
+        markdown_content = f.read()
+      gr.Markdown(markdown_content)
+    with gr.Accordion("モデルの新規登録", open=False):
       model_id_input = gr.Textbox(label="モデルID", max_lines=1)
       reg_weight_class_radio = gr.Radio(choices=["U-5GB", "U-10GB"], label="Weight Class", value="U-5GB")
       description_input = gr.Textbox(label="Description (オプション)", placeholder="任意の説明を入力", max_lines=1)
