@@ -27,7 +27,8 @@ def get_cached_model_and_tokenizer(model_id: str):
       model = AutoModelForCausalLM.from_pretrained(
         model_id,
         device_map="auto",
-        torch_dtype=torch.bfloat16
+        torch_dtype=torch.bfloat16,
+        use_safetensors=True
       )
       model.eval()
       _model_cache[model_id] = (model, tokenizer)
@@ -44,7 +45,8 @@ def generate(message: str, chat_history: list, model_id: str, max_new_tokens: in
     model = AutoModelForCausalLM.from_pretrained(
       model_id,
       device_map="auto",
-      torch_dtype=torch.bfloat16
+      torch_dtype=torch.bfloat16,
+      use_safetensors=True
     )
 
   conversation = chat_history.copy()
