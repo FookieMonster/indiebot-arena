@@ -11,7 +11,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 from indiebot_arena.config import LOCAL_TESTING, MODEL_SELECTION_MODE, MAX_INPUT_TOKEN_LENGTH, MAX_NEW_TOKENS
 from indiebot_arena.service.arena_service import ArenaService
 
-DESCRIPTION = "# チャットバトル"
+DESCRIPTION = "### 💬 チャットバトル"
 
 _model_cache = {}
 _model_lock = threading.Lock()
@@ -169,20 +169,20 @@ def battle_content(dao, language):
     gr.Markdown(DESCRIPTION)
     weight_class_radio = gr.Radio(
       choices=["U-5GB", "U-10GB"],
-      label="Select Weight Class",
+      label="階級",
       value=default_weight
     )
     dropdown_options_state = gr.State(initial_choices)
     with gr.Row():
       model_dropdown_a = gr.Dropdown(
         choices=initial_choices,
-        label="Select Model A",
+        label="モデルAを選択",
         value=initial_value_a,
         visible=dropdown_visible
       )
       model_dropdown_b = gr.Dropdown(
         choices=initial_choices,
-        label="Select Model B",
+        label="モデルBを選択",
         value=initial_value_b,
         visible=dropdown_visible
       )
@@ -207,7 +207,7 @@ def battle_content(dao, language):
       with gr.Column(scale=3):
         vote_message = gr.Textbox(show_label=False, interactive=False, visible=False)
       with gr.Column(scale=1):
-        next_battle_btn = gr.Button("Next Battle", interactive=False, visible=False, elem_id="next_battle_btn")
+        next_battle_btn = gr.Button("次のバトルへ", interactive=False, visible=False, elem_id="next_battle_btn")
     user_input.submit(
       fn=submit_message,
       inputs=[user_input, chatbot_a, chatbot_b, model_dropdown_a, model_dropdown_b],

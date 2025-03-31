@@ -1,10 +1,14 @@
+import os
+
 import gradio as gr
 import pandas as pd
 
 from indiebot_arena.service.arena_service import ArenaService
 
-DESCRIPTION = "# リーダーボード"
+DESCRIPTION = "### 🏆️ リーダーボード"
 
+base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+docs_path = os.path.join(base_dir, "docs", "leaderboard_header.md")
 
 def leaderboard_content(dao, language):
   arena_service = ArenaService(dao)
@@ -27,14 +31,17 @@ def leaderboard_content(dao, language):
 
   initial_weight_class = "U-5GB"
   with gr.Blocks(css="style.css") as leaderboard_ui:
+    with open(docs_path, "r", encoding="utf-8") as f:
+      markdown_content = f.read()
+    gr.Markdown(markdown_content)
     gr.Markdown(DESCRIPTION)
-    weight_class_radio = gr.Radio(choices=["U-5GB", "U-10GB"], label="Weight Class", value=initial_weight_class)
+    weight_class_radio = gr.Radio(choices=["U-5GB", "U-10GB"], label="階級", value=initial_weight_class)
     leaderboard_table = gr.Dataframe(
       headers=["Rank", "Model Name", "Elo Score", "File Size (GB)", "Description", "Last Updated"],
       value=fetch_leaderboard_data(initial_weight_class),
       interactive=False
     )
-    refresh_btn = gr.Button("Refresh")
+    refresh_btn = gr.Button("更新")
     weight_class_radio.change(fn=fetch_leaderboard_data, inputs=weight_class_radio, outputs=leaderboard_table)
     refresh_btn.click(fn=fetch_leaderboard_data, inputs=weight_class_radio, outputs=leaderboard_table)
   return leaderboard_ui
