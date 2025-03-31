@@ -120,7 +120,7 @@ def registration_content(dao, language):
 
     result_text = f"質問: {question}\n応答: {response}\n"
     if expected_word in response:
-      result_text += "成功: 応答に期待するワードが含まれています。\n"
+      result_text += "成功: 応答に期待するワードが含まれています。\nモデル登録を実施して下さい。\n"
       register_enabled = True
     else:
       result_text += "失敗: 応答に期待するワードが含まれていません。\n"
@@ -133,7 +133,7 @@ def registration_content(dao, language):
         raise ValueError("No meta info available.")
       model_id_extracted = meta.model_id
       file_size_gb = meta.weights_file_size
-      quantization = "bnd" if meta.quantization.lower()=="bitsandbytes" else "none"
+      quantization = "bnb" if meta.quantization.lower()=="bitsandbytes" else "none"
       weights_format = meta.weights_format
       file_format = "safetensors" if "safetensors" in weights_format.lower() else weights_format
       desc = description if description else ""
