@@ -9,11 +9,10 @@ import spaces
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-from indiebot_arena.config import LOCAL_TESTING, MODEL_SELECTION_MODE, MAX_NEW_TOKENS
+from indiebot_arena.config import LOCAL_TESTING, MODEL_SELECTION_MODE, MAX_INPUT_TOKEN_LENGTH, MAX_NEW_TOKENS
 from indiebot_arena.service.arena_service import ArenaService
 
 DESCRIPTION = "# チャットバトル"
-MAX_INPUT_TOKEN_LENGTH = int(os.getenv("MAX_INPUT_TOKEN_LENGTH", "4096"))
 
 _model_cache = {}
 _model_lock = threading.Lock()
@@ -123,9 +122,9 @@ def battle_content(dao, language):
     try:
       arena_service.record_battle(language, weight_class, model_a._id, model_b._id, winner._id, user_id)
       arena_service.update_leaderboard(language, weight_class)
-      return "Vote recorded."
+      return "投票が完了しました"
     except Exception as e:
-      return f"Error recording vote: {e}"
+      return f"エラー: {e}"
 
   def handle_vote(vote_choice, weight_class, model_a_name, model_b_name, request: gr.Request):
     msg = submit_vote(vote_choice, weight_class, model_a_name, model_b_name, request)

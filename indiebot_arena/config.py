@@ -7,6 +7,7 @@ LANGUAGE = "ja"
 DEBUG = os.getenv("DEBUG", "False").lower() in ["true", "1", "yes"]
 LOCAL_TESTING = os.getenv("LOCAL_TESTING", "False").lower() in ["true", "1", "yes"]
 MODEL_SELECTION_MODE = os.getenv("MODEL_SELECTION_MODE", "random")
+MAX_INPUT_TOKEN_LENGTH = int(os.getenv("MAX_INPUT_TOKEN_LENGTH", "4096"))
 
 if LOCAL_TESTING:
   MAX_NEW_TOKENS = 20
