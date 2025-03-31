@@ -149,6 +149,52 @@ class TestArenaService(unittest.TestCase):
     self.assertIsNotNone(model2_entry)
     self.assertGreater(model1_entry.elo_score, model2_entry.elo_score)
 
+  def test_duplicate_battle(self):
+    language = "ja"
+    weight_class = "U-5GB"
+
+    model1_id = self.arena_service.register_model(
+      language=language,
+      weight_class=weight_class,
+      model_name="testuser/dup-model1",
+      runtime="transformers",
+      quantization="bnb",
+      file_format="safetensors",
+      file_size_gb=3.0,
+      description="Duplicate test model 1"
+    )
+    model2_id = self.arena_service.register_model(
+      language=language,
+      weight_class=weight_class,
+      model_name="testuser/dup-model2",
+      runtime="transformers",
+      quantization="bnb",
+      file_format="safetensors",
+      file_size_gb=3.0,
+      description="Duplicate test model 2"
+    )
+
+    battle_id = self.arena_service.record_battle(
+      language=language,
+      weight_class=weight_class,
+      model_a_id=model1_id,
+      model_b_id=model2_id,
+      winner_model_id=model1_id,
+      user_id="test_user"
+    )
+    self.assertIsNotNone(battle_id)
+
+    with self.assertRaises(ValueError) as context:
+      self.arena_service.record_battle(
+        language=language,
+        weight_class=weight_class,
+        model_a_id=model1_id,
+        model_b_id=model2_id,
+        winner_model_id=model1_id,
+        user_id="test_user"
+      )
+    self.assertIn("Duplicate battle record detected", str(context.exception))
+
   @classmethod
   def tearDownClass(cls):
     cls.dao.models_collection.delete_many({})

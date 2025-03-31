@@ -104,6 +104,12 @@ class MongoDAO:
     cursor = self.battles_collection.find(query)
     return [Battle(**doc) for doc in cursor]
 
+  def find_last_battle(self) -> Optional[Battle]:
+    battle_doc = self.battles_collection.find_one(sort=[("_id", -1)])
+    if battle_doc:
+      return Battle(**battle_doc)
+    return None
+
   # ---------- LeaderboardEntry ----------
 
   def insert_leaderboard_entry(self, entry: LeaderboardEntry) -> ObjectId:

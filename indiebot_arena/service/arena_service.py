@@ -134,6 +134,17 @@ class ArenaService:
     if winner_model_id!=model_a_id and winner_model_id!=model_b_id:
       raise ValueError("Winner model ID must be either model_a_id or model_b_id.")
 
+    # Check duplicate
+    last_battle = self.dao.find_last_battle()
+    if last_battle is not None:
+      if (last_battle.language==language and
+          last_battle.weight_class==weight_class and
+          last_battle.model_a_id==model_a_id and
+          last_battle.model_b_id==model_b_id and
+          last_battle.winner_model_id==winner_model_id and
+          last_battle.user_id==user_id):
+        raise ValueError("Duplicate battle record detected: the latest record already matches the provided battle details.")
+
     # Check model exists
     model_a = self.dao.get_model(model_a_id)
     model_b = self.dao.get_model(model_b_id)
