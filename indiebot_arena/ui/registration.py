@@ -100,26 +100,31 @@ def registration_content(dao, language):
     if meta.quantization.lower() not in ["bitsandbytes", "none"]:
       err = "Error: Quantization must be bitsandbytes or none."
       return (current_output + "\n" + err, gr.update(interactive=False), None)
-    display_str = format_model_meta(meta) + "\nロードテストが完了しました。チャットテストを実施してください。"
+    display_str = format_model_meta(meta) + "\n\nロードテストが成功しました。\nチャットテストを実施して下さい。\n"
     return (current_output + "\n" + display_str, gr.update(interactive=True), meta)
 
   def chat_test(model_id, current_output):
     question = "日本の首都は？"
     expected_word = "東京"
-    response = generate(question, [], model_id)
-    result_text = f"チャットテストの質問: {question}\n応答: {response}\n"
+    try:
+      response = generate(question, [], model_id)
+    except Exception as e:
+      error_msg = f"エラー: {str(e)}"
+      return (current_output + "\n" + error_msg, gr.update(interactive=False))
+
+    result_text = f"質問: {question}\n応答: {response}\n"
     if expected_word in response:
-      result_text += "チャットテスト合格: 応答に期待するワードが含まれています。"
+      result_text += "成功: 応答に期待するワードが含まれています。\n"
       register_enabled = True
     else:
-      result_text += "チャットテスト失敗: 応答に期待するワードが含まれていません。"
+      result_text += "失敗: 応答に期待するワードが含まれていません。\n"
       register_enabled = False
     return (current_output + "\n" + result_text, gr.update(interactive=register_enabled))
 
   def register_model(meta, weight_class, description, current_output):
     try:
       if meta is None:
-        raise ValueError("No meta info available. ロードテストを実施してください。")
+        raise ValueError("No meta info available.")
       model_id_extracted = meta.model_id
       file_size_gb = meta.weights_file_size
       quantization = "bnd" if meta.quantization.lower()=="bitsandbytes" else "none"
@@ -160,7 +165,7 @@ def registration_content(dao, language):
     with gr.Accordion("モデルの新規登録", open=False):
       model_id_input = gr.Textbox(label="モデルID", max_lines=1)
       reg_weight_class_radio = gr.Radio(choices=["U-5GB", "U-10GB"], label="Weight Class", value="U-5GB")
-      description_input = gr.Textbox(label="Description (オプション)", placeholder="任意の説明を入力", max_lines=1)
+      description_input = gr.Textbox(label="Description (オプション)", placeholder="任意の説明を入力", max_lines=1, visible=False)
       output_box = gr.Textbox(label="結果出力", lines=10)
       meta_state = gr.State(None)
       with gr.Row():
