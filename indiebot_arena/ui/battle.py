@@ -1,6 +1,5 @@
 import concurrent.futures
 import hashlib
-import os
 import random
 import threading
 
