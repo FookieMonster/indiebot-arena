@@ -11,6 +11,7 @@ from indiebot_arena.service.arena_service import ArenaService
 from indiebot_arena.ui.battle import generate
 
 DESCRIPTION = "# 登録済みモデル"
+
 base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 docs_path = os.path.join(base_dir, "docs", "model_registration_guide.md")
 
@@ -42,7 +43,12 @@ def format_model_meta(meta: ModelMeta) -> str:
 def get_model_meta(model_id: str):
   try:
     config = AutoConfig.from_pretrained(model_id)
-    model = AutoModelForCausalLM.from_pretrained(model_id, device_map="auto", torch_dtype=torch.bfloat16)
+    model = AutoModelForCausalLM.from_pretrained(
+      model_id,
+      device_map="auto",
+      torch_dtype=torch.bfloat16,
+      use_safetensors=True
+    )
     tokenizer = AutoTokenizer.from_pretrained(model_id)
     repo_info = model_info(model_id)
     weights_files = [file.rfilename for file in repo_info.siblings if
