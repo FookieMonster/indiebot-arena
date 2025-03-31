@@ -1,4 +1,5 @@
 import os
+import re
 from dataclasses import dataclass
 
 import gradio as gr
@@ -91,6 +92,9 @@ def registration_content(dao, language):
     return data
 
   def load_test(model_id, weight_class, current_output):
+    if not re.match(r'^[a-zA-Z0-9._-]+/[a-zA-Z0-9._-]+$', model_id):
+      err = "Error: Invalid model_id format. It must be in the format 'owner/model'."
+      return (current_output + "\n" + err, gr.update(interactive=False), None)
     meta = get_model_meta(model_id)
     if isinstance(meta, str) and meta.startswith("Error:"):
       return (current_output + "\n" + meta, gr.update(interactive=False), None)
