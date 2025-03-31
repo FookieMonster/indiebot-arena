@@ -138,6 +138,7 @@ def registration_content(dao, language):
       file_format = "safetensors" if "safetensors" in weights_format.lower() else weights_format
       desc = description if description else ""
       arena_service.register_model(language, weight_class, model_id_extracted, "transformers", quantization, file_format, file_size_gb, desc)
+      arena_service.update_leaderboard(language, weight_class)
       result = "モデルの登録が完了しました。"
       disable = True
     except Exception as e:
