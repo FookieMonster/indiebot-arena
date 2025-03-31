@@ -1,6 +1,9 @@
 h1 {
+  font-size: 2.5rem;
+  font-weight: 800;
   text-align: left;
-  display: block;
+  margin-bottom: 1rem;
+  line-height: 1.2;
 }
 
 #duplicate-button {

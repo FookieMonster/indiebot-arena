@@ -199,7 +199,6 @@ def battle_content(dao, language):
       vote_b_btn = gr.Button("B is better", interactive=False)
     user_input = gr.Textbox(
       placeholder="日本語でメッセージを入力...",
-      value="日本の首都は？",
       submit_btn=True,
       show_label=False
     )
