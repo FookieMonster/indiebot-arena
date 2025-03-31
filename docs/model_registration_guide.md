@@ -5,7 +5,7 @@
 パラメータ数ではなく、重みのファイルのサイズが5GB未満または10GB未満で階級ごとに分かれてリーダーボードが作れます。
 
 - **GPU環境**: HF SpacesのZeroGPU A100(40GB)
-- **実行環境**: transformersライブラリ（4.50.0）
+- **LLM実行環境**: transformersライブラリ（4.50.0）
 - **量子化**: BitsAndBytesのみ対応（0.44.1）
 - **ファイル形式**: safetensorsのみ
 - **ファイルサイズ**:　5GB又は10GB未満
@@ -33,7 +33,7 @@
 以下はBitsAndBytesで4bit量子化して自分のリポジトリにPushするまでのサンプルコードです。
 
 ```
-# 必要なPythonパッケージのインストール
+# python 3.10
 pip install bitsandbytes==0.44.1
 pip install accelerate==1.2.1
 pip install transformers==4.50.0
