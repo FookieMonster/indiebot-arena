@@ -2,6 +2,7 @@
 
 登録可能なモデルは、Hugging Faceのモデルハブで公開されているPyTorchベースのモデルで、transformersライブラリのgenerate APIに対応している必要があります。
 重みのファイル形式はsafetensorsのみで、量子化する場合はBitsAndBytesのバージョン0.44.1以降で量子化されている必要があります。
+tokenizer_config.jsonで正しくchat_templateが設定されている必要があります。
 パラメータ数ではなく、重みのファイルのサイズが5GB未満または10GB未満で階級ごとに分かれてリーダーボードが作れます。
 
 - **GPU環境**: HF SpacesのZeroGPU A100(40GB)
@@ -9,6 +10,7 @@
 - **量子化**: BitsAndBytesのみ対応（0.44.1）
 - **ファイル形式**: safetensorsのみ
 - **ファイルサイズ**:　5GB又は10GB未満
+- **チャットテンプレート**: chat_template設定が必要（tokenizer_config.json）
 
 非量子化モデルでもファイルサイズ制限をクリアすれば登録可能ですが、サーバーの負荷低減のためにBitsAndBytesによる量子化を推奨します。
 将来的には、llama.cppの実行環境でGGUF形式に対応する予定です。
