@@ -27,7 +27,7 @@ class ArenaService:
       quantization: str,
       file_format: str,
       file_size_gb: float,
-      description: Optional[str] = None
+      description: Optional[str] = ""
   ) -> ObjectId:
     # Non-empty checks
     if not model_name.strip():

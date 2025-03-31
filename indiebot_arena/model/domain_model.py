@@ -14,7 +14,7 @@ class Model:
   quantization: str           # 量子化方式 (例: "none", "bnb", "gptq")
   file_format: str            # 保存形式 (例: "safetensors", "gguf")
   file_size_gb: float         # ファイルサイズ（単位: GB）
-  description: Optional[str] = ""
+  description: Optional[str] = None
   created_at: datetime = field(default_factory=datetime.utcnow)
   _id: Optional[ObjectId] = None
 
