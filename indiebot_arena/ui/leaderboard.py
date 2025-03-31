@@ -38,10 +38,10 @@ def leaderboard_content(dao, language):
     weight_class_radio = gr.Radio(choices=["U-5GB", "U-10GB"], label="階級", value=initial_weight_class)
     leaderboard_table = gr.Dataframe(
       headers=["Rank", "Model Name", "Elo Score", "File Size (GB)", "Description", "Last Updated"],
-      value=fetch_leaderboard_data(initial_weight_class),
       interactive=False
     )
     refresh_btn = gr.Button("更新")
     weight_class_radio.change(fn=fetch_leaderboard_data, inputs=weight_class_radio, outputs=leaderboard_table)
     refresh_btn.click(fn=fetch_leaderboard_data, inputs=weight_class_radio, outputs=leaderboard_table)
+    leaderboard_ui.load(fn=fetch_leaderboard_data, inputs=weight_class_radio, outputs=leaderboard_table)
   return leaderboard_ui

@@ -165,10 +165,11 @@ def registration_content(dao, language):
     mdl_list = gr.Dataframe(
       headers=["Weight Class", "Model Name", "Runtime", "Quantization", "Weights Format",
                "Weights File Size", "Description", "Created At"],
-      value=fetch_models("U-5GB"),
+      value=[],
       interactive=False
     )
     weight_class_radio.change(fn=fetch_models, inputs=weight_class_radio, outputs=mdl_list)
+    ui.load(fn=fetch_models, inputs=weight_class_radio, outputs=mdl_list)
     with gr.Accordion("🔰 モデルの登録ガイド", open=False):
       with open(docs_path, "r", encoding="utf-8") as f:
         markdown_content = f.read()
