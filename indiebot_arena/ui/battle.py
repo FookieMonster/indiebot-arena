@@ -138,10 +138,13 @@ def battle_content(dao, language):
     )
 
   def generate_anonymous_user_id(request: gr.Request):
-    user_ip = request.client.host
-    user_id = "indiebot:" + user_ip
-    hashed_user_id = hashlib.sha256(user_id.encode("utf-8")).hexdigest()[:16]
-    return hashed_user_id
+    user_ip = request.headers.get('x-forwarded-for')
+    if user_ip:
+      user_id = "indiebot:" + user_ip
+      hashed_user_id = hashlib.sha256(user_id.encode("utf-8")).hexdigest()[:16]
+      return hashed_user_id
+    else:
+      return "anonymous"
 
   def on_vote_a_click(weight, a, b, request: gr.Request):
     return handle_vote("Chatbot A", weight, a, b, request)
