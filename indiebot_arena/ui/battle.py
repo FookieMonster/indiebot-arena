@@ -1,4 +1,5 @@
 import concurrent.futures
+import hashlib
 import os
 import random
 import threading
@@ -112,19 +113,20 @@ def battle_content(dao, language):
     update_obj_b = gr.update(choices=model_labels, value=value_b)
     return update_obj_a, update_obj_b, model_labels
 
-  def submit_vote(vote_choice, weight_class, model_a_name, model_b_name):
+  def submit_vote(vote_choice, weight_class, model_a_name, model_b_name, request: gr.Request):
+    user_id = generate_anonymous_user_id(request)
     model_a = arena_service.get_one_model(language, weight_class, model_a_name)
     model_b = arena_service.get_one_model(language, weight_class, model_b_name)
     winner = model_a if vote_choice=="Chatbot A" else model_b
     try:
-      arena_service.record_battle(language, weight_class, model_a._id, model_b._id, winner._id, "anonymous")
+      arena_service.record_battle(language, weight_class, model_a._id, model_b._id, winner._id, user_id)
       arena_service.update_leaderboard(language, weight_class)
       return "Vote recorded."
     except Exception as e:
       return f"Error recording vote: {e}"
 
-  def handle_vote(vote_choice, weight_class, model_a_name, model_b_name):
-    msg = submit_vote(vote_choice, weight_class, model_a_name, model_b_name)
+  def handle_vote(vote_choice, weight_class, model_a_name, model_b_name, request: gr.Request):
+    msg = submit_vote(vote_choice, weight_class, model_a_name, model_b_name, request)
     return (
       gr.update(value=msg, visible=True),
       gr.update(interactive=False, value=model_a_name),
@@ -132,6 +134,18 @@ def battle_content(dao, language):
       gr.update(visible=False),
       gr.update(visible=True, interactive=True)
     )
+
+  def generate_anonymous_user_id(request: gr.Request):
+    user_ip = request.client.host
+    user_id = "indiebot:" + user_ip
+    hashed_user_id = hashlib.sha256(user_id.encode("utf-8")).hexdigest()[:16]
+    return hashed_user_id
+
+  def on_vote_a_click(weight, a, b, request: gr.Request):
+    return handle_vote("Chatbot A", weight, a, b, request)
+
+  def on_vote_b_click(weight, a, b, request: gr.Request):
+    return handle_vote("Chatbot B", weight, a, b, request)
 
   def reset_battle(dropdown_options):
     value_a, value_b = get_random_values(dropdown_options)
@@ -197,12 +211,12 @@ def battle_content(dao, language):
       outputs=[chatbot_a, chatbot_b, user_input, vote_a_btn, vote_b_btn, weight_class_radio]
     )
     vote_a_btn.click(
-      fn=lambda weight, a, b: handle_vote("Chatbot A", weight, a, b),
+      fn=on_vote_a_click,
       inputs=[weight_class_radio, model_dropdown_a, model_dropdown_b],
       outputs=[vote_message, vote_a_btn, vote_b_btn, user_input, next_battle_btn]
     )
     vote_b_btn.click(
-      fn=lambda weight, a, b: handle_vote("Chatbot B", weight, a, b),
+      fn=on_vote_b_click,
       inputs=[weight_class_radio, model_dropdown_a, model_dropdown_b],
       outputs=[vote_message, vote_a_btn, vote_b_btn, user_input, next_battle_btn]
     )
