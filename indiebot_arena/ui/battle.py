@@ -149,7 +149,7 @@ def battle_content(dao, language):
     gr.Markdown(DESCRIPTION)
     with open(docs_path, "r", encoding="utf-8") as f:
       markdown_content = f.read()
-    gr.Markdown(markdown_content)
+    gr.HTML(markdown_content)
     weight_class_radio = gr.Radio(
       choices=["U-5GB", "U-10GB"],
       label="階級",
@@ -175,8 +175,8 @@ def battle_content(dao, language):
       outputs=[model_dropdown_a, model_dropdown_b, dropdown_options_state]
     )
     with gr.Row():
-      chatbot_a = gr.Chatbot(label="Chatbot A")
-      chatbot_b = gr.Chatbot(label="Chatbot B")
+      chatbot_a = gr.Chatbot(label="Chatbot A", height=600)
+      chatbot_b = gr.Chatbot(label="Chatbot B", height=600)
     with gr.Row():
       vote_a_btn = gr.Button("A is better", variant="primary", interactive=False)
       vote_b_btn = gr.Button("B is better", variant="primary", interactive=False)

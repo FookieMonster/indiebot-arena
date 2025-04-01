@@ -30,9 +30,7 @@ tokenizer_config.jsonで正しくchat_templateが設定されている必要が�
 ロードテストとチャットテストをクリアしたモデルだけ登録可能です。
 登録が完了すると、登録済みモデル一覧にあなたのモデルが表示されます。
 
-### 量子化サンプルコード
-
-<details><summary>量子化サンプルコード</summary>
+## 量子化サンプルコード
 
 以下はBitsAndBytesで4bit量子化して自分のリポジトリにPushするまでのサンプルコードです。
 
@@ -73,4 +71,3 @@ model.push_to_hub(repo_id)
 ```
 [量子化前のモデルID]-bnb-4bit
 ```
-</details>
