@@ -32,39 +32,8 @@ tokenizer_config.jsonで正しくchat_templateが設定されている必要が�
 
 ## 量子化サンプルコード
 
-以下はBitsAndBytesで4bit量子化して自分のリポジトリにPushするまでのサンプルコードです。
+サンプルコードは[こちら](https://huggingface.co/fukugawa/gemma-2-9b-finetuned-bnb-4bit)
 
-```
-# python 3.10
-pip install bitsandbytes==0.44.1
-pip install accelerate==1.2.1
-pip install transformers==4.50.0
-pip install huggingface_hub[cli]
-```
-```
-# アクセストークンを入力してログイン
-huggingface-cli login
-```
-```python
-import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
-
-model_id = "google/gemma-2-2b-it" 
-repo_id = "xxxxx/gemma-2-2b-it-bnb-4bit" 
-
-bnb_config = BitsAndBytesConfig(
-    load_in_4bit=True,
-    bnb_4bit_quant_type="nf4",
-    bnb_4bit_compute_dtype=torch.bfloat16
-)
-
-tokenizer = AutoTokenizer.from_pretrained(model_id)
-model = AutoModelForCausalLM.from_pretrained(model_id, quantization_config=bnb_config, device_map="auto")
-
-tokenizer.push_to_hub(repo_id)
-model.push_to_hub(repo_id)
-
-```
 量子化後のモデルIDは任意の名前が可能ですが、以下の形式を推奨します。
 
 * BitsAndBytesの4bit量子化の場合
