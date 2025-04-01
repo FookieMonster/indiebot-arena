@@ -170,10 +170,10 @@ def battle_content(dao, language):
     )
 
   with gr.Blocks(css="style.css") as battle_ui:
+    gr.Markdown(DESCRIPTION)
     with open(docs_path, "r", encoding="utf-8") as f:
       markdown_content = f.read()
     gr.Markdown(markdown_content)
-    gr.Markdown(DESCRIPTION)
     weight_class_radio = gr.Radio(
       choices=["U-5GB", "U-10GB"],
       label="階級",
