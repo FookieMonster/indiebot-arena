@@ -175,8 +175,8 @@ def battle_content(dao, language):
       outputs=[model_dropdown_a, model_dropdown_b, dropdown_options_state]
     )
     with gr.Row():
-      chatbot_a = gr.Chatbot(label="Chatbot A", height=600)
-      chatbot_b = gr.Chatbot(label="Chatbot B", height=600)
+      chatbot_a = gr.Chatbot(label="Chatbot A")
+      chatbot_b = gr.Chatbot(label="Chatbot B")
     with gr.Row():
       vote_a_btn = gr.Button("A is better", variant="primary", interactive=False)
       vote_b_btn = gr.Button("B is better", variant="primary", interactive=False)
