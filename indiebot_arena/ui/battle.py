@@ -1,5 +1,6 @@
 import concurrent.futures
 import hashlib
+import os
 import random
 import threading
 
@@ -12,6 +13,9 @@ from indiebot_arena.config import LOCAL_TESTING, MODEL_SELECTION_MODE, MAX_INPUT
 from indiebot_arena.service.arena_service import ArenaService
 
 DESCRIPTION = "### 💬 チャットバトル"
+
+base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+docs_path = os.path.join(base_dir, "docs", "battle_header.md")
 
 _model_cache = {}
 _model_lock = threading.Lock()
@@ -97,6 +101,7 @@ def get_random_values(model_labels):
   if MODEL_SELECTION_MODE=="manual":
     return model_labels[0], model_labels[0]
 
+
 def battle_content(dao, language):
   arena_service = ArenaService(dao)
   default_weight = "U-5GB"
@@ -166,6 +171,9 @@ def battle_content(dao, language):
     )
 
   with gr.Blocks(css="style.css") as battle_ui:
+    with open(docs_path, "r", encoding="utf-8") as f:
+      markdown_content = f.read()
+    gr.Markdown(markdown_content)
     gr.Markdown(DESCRIPTION)
     weight_class_radio = gr.Radio(
       choices=["U-5GB", "U-10GB"],
