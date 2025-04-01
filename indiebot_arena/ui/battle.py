@@ -85,11 +85,10 @@ def submit_message(message, history_a, history_b, model_a, model_b):
   history_b.append((message, ""))
   conv_history_a = format_chat_history(history_a[:-1])
   conv_history_b = format_chat_history(history_b[:-1])
-  with concurrent.futures.ThreadPoolExecutor() as executor:
-    future_a = executor.submit(generate, message, conv_history_a, model_a)
-    future_b = executor.submit(generate, message, conv_history_b, model_b)
-    response_a = future_a.result()
-    response_b = future_b.result()
+
+  response_a = generate(message, conv_history_a, model_a)
+  response_b = generate(message, conv_history_b, model_b)
+
   history_a[-1] = (message, response_a)
   history_b[-1] = (message, response_b)
   return history_a, history_b, "", gr.update(interactive=True), gr.update(interactive=True), gr.update(interactive=False)
