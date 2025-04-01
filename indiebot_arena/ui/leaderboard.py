@@ -40,7 +40,7 @@ def leaderboard_content(dao, language):
       headers=["Rank", "Model Name", "Elo Score", "File Size (GB)", "Description", "Last Updated"],
       interactive=False
     )
-    refresh_btn = gr.Button("更新")
+    refresh_btn = gr.Button("更新", variant="primary")
     weight_class_radio.change(fn=fetch_leaderboard_data, inputs=weight_class_radio, outputs=leaderboard_table)
     refresh_btn.click(fn=fetch_leaderboard_data, inputs=weight_class_radio, outputs=leaderboard_table)
     leaderboard_ui.load(fn=fetch_leaderboard_data, inputs=weight_class_radio, outputs=leaderboard_table)

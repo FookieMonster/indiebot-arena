@@ -181,9 +181,9 @@ def registration_content(dao, language):
       output_box = gr.Textbox(label="結果出力", lines=10)
       meta_state = gr.State(None)
       with gr.Row():
-        test_btn = gr.Button("ロードテスト")
-        chat_test_btn = gr.Button("チャットテスト", interactive=False)
-        register_btn = gr.Button("モデル登録", interactive=False)
+        test_btn = gr.Button("ロードテスト", variant="primary")
+        chat_test_btn = gr.Button("チャットテスト", variant="primary", interactive=False)
+        register_btn = gr.Button("モデル登録", variant="primary", interactive=False)
         clear_btn = gr.Button("クリア")
       test_btn.click(fn=load_test, inputs=[model_id_input, reg_weight_class_radio, output_box], outputs=[output_box,
                                                                                                          chat_test_btn,
