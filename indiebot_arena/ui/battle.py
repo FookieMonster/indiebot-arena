@@ -1,15 +1,13 @@
-import concurrent.futures
 import hashlib
 import os
 import random
-import threading
 
 import gradio as gr
 import spaces
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-from indiebot_arena.config import LOCAL_TESTING, MODEL_SELECTION_MODE, MAX_INPUT_TOKEN_LENGTH, MAX_NEW_TOKENS
+from indiebot_arena.config import MODEL_SELECTION_MODE, MAX_INPUT_TOKEN_LENGTH, MAX_NEW_TOKENS
 from indiebot_arena.service.arena_service import ArenaService
 
 DESCRIPTION = "### 💬 チャットバトル"
@@ -17,39 +15,17 @@ DESCRIPTION = "### 💬 チャットバトル"
 base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 docs_path = os.path.join(base_dir, "docs", "battle_header.md")
 
-_model_cache = {}
-_model_lock = threading.Lock()
-
-
-# Avoid “cannot copy out of meta tensor” error
-def get_cached_model_and_tokenizer(model_id: str):
-  with _model_lock:
-    if model_id not in _model_cache:
-      tokenizer = AutoTokenizer.from_pretrained(model_id)
-      model = AutoModelForCausalLM.from_pretrained(
-        model_id,
-        device_map="auto",
-        torch_dtype=torch.bfloat16,
-        use_safetensors=True
-      )
-      model.eval()
-      _model_cache[model_id] = (model, tokenizer)
-    return _model_cache[model_id]
-
 
 @spaces.GPU(duration=30)
 def generate(message: str, chat_history: list, model_id: str, max_new_tokens: int = MAX_NEW_TOKENS,
              temperature: float = 0.6, top_p: float = 0.9, top_k: int = 50, repetition_penalty: float = 1.2) -> str:
-  if LOCAL_TESTING:
-    model, tokenizer = get_cached_model_and_tokenizer(model_id)
-  else:
-    tokenizer = AutoTokenizer.from_pretrained(model_id)
-    model = AutoModelForCausalLM.from_pretrained(
-      model_id,
-      device_map="auto",
-      torch_dtype=torch.bfloat16,
-      use_safetensors=True
-    )
+  tokenizer = AutoTokenizer.from_pretrained(model_id)
+  model = AutoModelForCausalLM.from_pretrained(
+    model_id,
+    device_map="auto",
+    torch_dtype=torch.bfloat16,
+    use_safetensors=True
+  )
 
   conversation = chat_history.copy()
   conversation.append({"role": "user", "content": message})
