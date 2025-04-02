@@ -1,3 +1,7 @@
+<p>
+  <strong>Hugging Faceにログインした状態でご利用下さい。<br>
+  ログインすると、ZeroGPUの無料使用割当の5分/日が利用できます。</strong>
+</p>
 <details>
   <summary>「ZeroGPU quota exceeded」のエラーについて</summary>
   <p>
