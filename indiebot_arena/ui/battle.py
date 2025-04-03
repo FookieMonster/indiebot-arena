@@ -9,7 +9,7 @@ import spaces
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer, TextIteratorStreamer
 
-from indiebot_arena.config import MODEL_SELECTION_MODE, MAX_NEW_TOKENS
+from indiebot_arena.config import MODEL_SELECTION_MODE, MAX_INPUT_TOKEN_LENGTH, MAX_NEW_TOKENS
 from indiebot_arena.service.arena_service import ArenaService
 
 DESCRIPTION = "### 💬 チャットバトル"
@@ -31,6 +31,9 @@ def generate(chat_history: list, model_id: str, max_new_tokens: int = MAX_NEW_TO
   model.eval()
 
   input_ids = tokenizer.apply_chat_template(chat_history, add_generation_prompt=True, return_tensors="pt")
+  if input_ids.shape[1] > MAX_INPUT_TOKEN_LENGTH:
+    input_ids = input_ids[:, -MAX_INPUT_TOKEN_LENGTH:]
+    gr.Warning(f"Trimmed input from conversation as it was longer than {MAX_INPUT_TOKEN_LENGTH} tokens.")
   input_ids = input_ids.to(model.device)
 
   streamer = TextIteratorStreamer(tokenizer, timeout=20.0, skip_prompt=True, skip_special_tokens=True)
