@@ -1,13 +1,15 @@
 import hashlib
 import os
 import random
+from collections.abc import Iterator
+from threading import Thread
 
 import gradio as gr
 import spaces
 import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers import AutoModelForCausalLM, AutoTokenizer, TextIteratorStreamer
 
-from indiebot_arena.config import MODEL_SELECTION_MODE, MAX_INPUT_TOKEN_LENGTH, MAX_NEW_TOKENS
+from indiebot_arena.config import MODEL_SELECTION_MODE, MAX_NEW_TOKENS
 from indiebot_arena.service.arena_service import ArenaService
 
 DESCRIPTION = "### 💬 チャットバトル"
@@ -17,8 +19,8 @@ docs_path = os.path.join(base_dir, "docs", "battle_header.md")
 
 
 @spaces.GPU(duration=30)
-def generate(message: str, chat_history: list, model_id: str, max_new_tokens: int = MAX_NEW_TOKENS,
-             temperature: float = 0.6, top_p: float = 0.9, top_k: int = 50, repetition_penalty: float = 1.2) -> str:
+def generate(chat_history: list, model_id: str, max_new_tokens: int = MAX_NEW_TOKENS,
+             temperature: float = 0.6, top_p: float = 0.9, top_k: int = 50, repetition_penalty: float = 1.2)-> Iterator[str]:
   tokenizer = AutoTokenizer.from_pretrained(model_id)
   model = AutoModelForCausalLM.from_pretrained(
     model_id,
@@ -26,48 +28,54 @@ def generate(message: str, chat_history: list, model_id: str, max_new_tokens: in
     torch_dtype=torch.bfloat16,
     use_safetensors=True
   )
+  model.eval()
 
-  conversation = chat_history.copy()
-  conversation.append({"role": "user", "content": message})
-  input_ids = tokenizer.apply_chat_template(conversation, add_generation_prompt=True, return_tensors="pt")
-  if input_ids.shape[1] > MAX_INPUT_TOKEN_LENGTH:
-    input_ids = input_ids[:, -MAX_INPUT_TOKEN_LENGTH:]
-    gr.Warning(f"Trimmed input as it exceeded {MAX_INPUT_TOKEN_LENGTH} tokens.")
+  input_ids = tokenizer.apply_chat_template(chat_history, add_generation_prompt=True, return_tensors="pt")
   input_ids = input_ids.to(model.device)
-  outputs = model.generate(
-    input_ids=input_ids,
+
+  streamer = TextIteratorStreamer(tokenizer, timeout=20.0, skip_prompt=True, skip_special_tokens=True)
+  generate_kwargs = dict(
+    {"input_ids": input_ids},
+    streamer=streamer,
     max_new_tokens=max_new_tokens,
     do_sample=True,
     top_p=top_p,
     top_k=top_k,
     temperature=temperature,
+    num_beams=1,
     repetition_penalty=repetition_penalty,
   )
-  response = tokenizer.decode(outputs[0][input_ids.shape[1]:], skip_special_tokens=True)
-  return response
+  t = Thread(target=model.generate, kwargs=generate_kwargs)
+  t.start()
+
+  outputs = []
+  for text in streamer:
+    outputs.append(text)
+    yield "".join(outputs)
 
 
-def format_chat_history(history):
-  conversation = []
-  for user_msg, assistant_msg in history:
-    conversation.append({"role": "user", "content": user_msg})
-    if assistant_msg:
-      conversation.append({"role": "assistant", "content": assistant_msg})
-  return conversation
+def update_user_message(user_message, history_a, history_b, weight_class_radio):
+  new_history_a = history_a + [{"role": "user", "content": user_message}]
+  new_history_b = history_b + [{"role": "user", "content": user_message}]
+  return "", new_history_a, new_history_b, gr.update(interactive=False)
 
 
-def submit_message(message, history_a, history_b, model_a, model_b):
-  history_a.append((message, ""))
-  history_b.append((message, ""))
-  conv_history_a = format_chat_history(history_a[:-1])
-  conv_history_b = format_chat_history(history_b[:-1])
+def bot1_response(history, model_id):
+  history = history.copy()
+  history.append({"role": "assistant", "content": ""})
+  conv_history = history[:-1]
+  for text in generate(conv_history, model_id):
+    history[-1]["content"] = text
+    yield history, gr.update(interactive=True), gr.update(interactive=True)
 
-  response_a = generate(message, conv_history_a, model_a)
-  response_b = generate(message, conv_history_b, model_b)
 
-  history_a[-1] = (message, response_a)
-  history_b[-1] = (message, response_b)
-  return history_a, history_b, "", gr.update(interactive=True), gr.update(interactive=True), gr.update(interactive=False)
+def bot2_response(history, model_id):
+  history = history.copy()
+  history.append({"role": "assistant", "content": ""})
+  conv_history = history[:-1]
+  for text in generate(conv_history, model_id):
+    history[-1]["content"] = text
+    yield history, gr.update(interactive=True), gr.update(interactive=True)
 
 
 def get_random_values(model_labels):
@@ -175,8 +183,8 @@ def battle_content(dao, language):
       outputs=[model_dropdown_a, model_dropdown_b, dropdown_options_state]
     )
     with gr.Row():
-      chatbot_a = gr.Chatbot(label="Chatbot A")
-      chatbot_b = gr.Chatbot(label="Chatbot B")
+      chatbot_a = gr.Chatbot(label="Chatbot A", type="messages")
+      chatbot_b = gr.Chatbot(label="Chatbot B", type="messages")
     with gr.Row():
       vote_a_btn = gr.Button("A is better", variant="primary", interactive=False)
       vote_b_btn = gr.Button("B is better", variant="primary", interactive=False)
@@ -190,10 +198,23 @@ def battle_content(dao, language):
         vote_message = gr.Textbox(show_label=False, interactive=False, visible=False)
       with gr.Column(scale=1):
         next_battle_btn = gr.Button("次のバトルへ", variant="primary", interactive=False, visible=False, elem_id="next_battle_btn")
-    user_input.submit(
-      fn=submit_message,
-      inputs=[user_input, chatbot_a, chatbot_b, model_dropdown_a, model_dropdown_b],
-      outputs=[chatbot_a, chatbot_b, user_input, vote_a_btn, vote_b_btn, weight_class_radio]
+    user_event = user_input.submit(
+      update_user_message,
+      inputs=[user_input, chatbot_a, chatbot_b, weight_class_radio],
+      outputs=[user_input, chatbot_a, chatbot_b, weight_class_radio],
+      queue=False
+    )
+    user_event.then(
+      bot1_response,
+      inputs=[chatbot_a, model_dropdown_a],
+      outputs=[chatbot_a, vote_a_btn, vote_b_btn],
+      queue=True
+    )
+    user_event.then(
+      bot2_response,
+      inputs=[chatbot_b, model_dropdown_b],
+      outputs=[chatbot_b, vote_a_btn, vote_b_btn],
+      queue=True
     )
     vote_a_btn.click(
       fn=on_vote_a_click,
