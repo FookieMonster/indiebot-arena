@@ -11,6 +11,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer, TextIteratorStream
 
 from indiebot_arena.config import MODEL_SELECTION_MODE, MAX_INPUT_TOKEN_LENGTH, MAX_NEW_TOKENS
 from indiebot_arena.service.arena_service import ArenaService
+from indiebot_arena.util.cache_manager import get_free_space_gb, clear_hf_cache
 
 DESCRIPTION = "### 💬 チャットバトル"
 
@@ -19,8 +20,13 @@ docs_path = os.path.join(base_dir, "docs", "battle_header.md")
 
 
 @spaces.GPU(duration=30)
-def generate(chat_history: list, model_id: str, max_new_tokens: int = MAX_NEW_TOKENS,
-             temperature: float = 0.6, top_p: float = 0.9, top_k: int = 50, repetition_penalty: float = 1.2)-> Iterator[str]:
+def generate(chat_history: list,
+             model_id: str,
+             max_new_tokens: int = MAX_NEW_TOKENS,
+             temperature: float = 0.6,
+             top_p: float = 0.9,
+             top_k: int = 50,
+             repetition_penalty: float = 1.2) -> Iterator[str]:
   tokenizer = AutoTokenizer.from_pretrained(model_id)
   model = AutoModelForCausalLM.from_pretrained(
     model_id,
@@ -58,6 +64,11 @@ def generate(chat_history: list, model_id: str, max_new_tokens: int = MAX_NEW_TO
 
 
 def update_user_message(user_message, history_a, history_b, weight_class_radio):
+  total, _, free = get_free_space_gb("/data")
+  print(f"空きディスク容量: {free:.2f} GB / {total:.2f} GB")
+  if free < (total * 0.2):
+    clear_hf_cache()
+
   new_history_a = history_a + [{"role": "user", "content": user_message}]
   new_history_b = history_b + [{"role": "user", "content": user_message}]
   return "", new_history_a, new_history_b, gr.update(interactive=False)
