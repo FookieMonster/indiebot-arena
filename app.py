@@ -5,6 +5,7 @@ from indiebot_arena.dao.mongo_dao import MongoDAO
 from indiebot_arena.service.bootstrap_service import BootstrapService
 from indiebot_arena.ui.battle import battle_content
 from indiebot_arena.ui.leaderboard import leaderboard_content
+from indiebot_arena.ui.playground import playground_content
 from indiebot_arena.ui.registration import registration_content
 
 dao = MongoDAO(MONGO_DB_URI, MONGO_DB_NAME)
@@ -17,6 +18,8 @@ with gr.Blocks(theme=gr.themes.Citrus(primary_hue="sky"), css_paths="style.css")
       leaderboard_content(dao, LANGUAGE)
     with gr.TabItem("⚔️ モデルに投票"):
       battle_content(dao, LANGUAGE)
+    with gr.TabItem("⚔️ プレイグラウンド"):
+      playground_content(dao, LANGUAGE)
     with gr.TabItem("📚️ モデルの登録"):
       registration_content(dao, LANGUAGE)
 
