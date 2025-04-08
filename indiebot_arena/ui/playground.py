@@ -13,7 +13,7 @@ base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 docs_path = os.path.join(base_dir, "docs", "battle_header.md")
 
 
-def update_user_message(user_message, history_a, weight_class_radio):
+def update_user_message(user_message, history_a):
   if not LOCAL_TESTING:
     total, _, free = get_free_space_gb("/data")
     print(f"空きディスク容量: {free:.2f} GB / {total:.2f} GB")
@@ -30,7 +30,7 @@ def bot1_response(history, model_id):
   conv_history = history[:-1]
   for text in generate(conv_history, model_id):
     history[-1]["content"] = text
-    yield history, gr.update(interactive=True), gr.update(interactive=True)
+    yield history
 
 
 def playground_content(dao, language):
@@ -75,7 +75,7 @@ def playground_content(dao, language):
     )
     user_event = user_input.submit(
       update_user_message,
-      inputs=[user_input, chatbot_a, weight_class_radio],
+      inputs=[user_input, chatbot_a],
       outputs=[user_input, chatbot_a, weight_class_radio],
       queue=False
     )
