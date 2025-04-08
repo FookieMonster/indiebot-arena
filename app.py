@@ -18,10 +18,10 @@ with gr.Blocks(theme=gr.themes.Citrus(primary_hue="sky"), css_paths="style.css")
       leaderboard_content(dao, LANGUAGE)
     with gr.TabItem("⚔️ モデルに投票"):
       battle_content(dao, LANGUAGE)
-    with gr.TabItem("⚔️ プレイグラウンド"):
-      playground_content(dao, LANGUAGE)
     with gr.TabItem("📚️ モデルの登録"):
       registration_content(dao, LANGUAGE)
+    with gr.TabItem("💬 Playground"):
+      playground_content(dao, LANGUAGE)
 
 if __name__=="__main__":
   demo.queue(max_size=20).launch()

@@ -7,7 +7,7 @@ from indiebot_arena.service.arena_service import ArenaService
 from indiebot_arena.ui.battle import generate
 from indiebot_arena.util.cache_manager import get_free_space_gb, clear_hf_cache
 
-DESCRIPTION = "### 💬 プレイグラウンド"
+DESCRIPTION = "### 💬 Playground"
 
 base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 docs_path = os.path.join(base_dir, "docs", "battle_header.md")
@@ -21,7 +21,7 @@ def update_user_message(user_message, history_a):
       clear_hf_cache()
 
   new_history_a = history_a + [{"role": "user", "content": user_message}]
-  return "", new_history_a, gr.update(interactive=False)
+  return "", new_history_a
 
 
 def bot1_response(history, model_id):
@@ -58,14 +58,9 @@ def playground_content(dao, language):
     )
     model_dropdown_a = gr.Dropdown(
       choices=initial_choices,
-      label="モデルAを選択",
+      label="モデルを選択",
       value=initial_value,
       visible=True
-    )
-    weight_class_radio.change(
-      fn=fetch_model_dropdown,
-      inputs=weight_class_radio,
-      outputs=[model_dropdown_a]
     )
     chatbot_a = gr.Chatbot(label="Chatbot A", type="messages")
     user_input = gr.Textbox(
@@ -76,7 +71,7 @@ def playground_content(dao, language):
     user_event = user_input.submit(
       update_user_message,
       inputs=[user_input, chatbot_a],
-      outputs=[user_input, chatbot_a, weight_class_radio],
+      outputs=[user_input, chatbot_a],
       queue=False
     )
     user_event.then(
@@ -84,5 +79,22 @@ def playground_content(dao, language):
       inputs=[chatbot_a, model_dropdown_a],
       outputs=[chatbot_a],
       queue=True
+    )
+    weight_class_radio.change(
+      fn=fetch_model_dropdown,
+      inputs=weight_class_radio,
+      outputs=[model_dropdown_a]
+    )
+    weight_class_radio.change(
+      fn=lambda _: [],
+      inputs=weight_class_radio,
+      outputs=chatbot_a,
+      queue=False
+    )
+    model_dropdown_a.change(
+      fn=lambda _: [],
+      inputs=model_dropdown_a,
+      outputs=chatbot_a,
+      queue=False
     )
   return battle_ui
