@@ -63,7 +63,7 @@ def generate(chat_history: list,
     yield "".join(outputs)
 
 
-def update_user_message(user_message, history_a, history_b, weight_class_radio):
+def update_user_message(user_message, history_a, history_b):
   if not LOCAL_TESTING:
     total, _, free = get_free_space_gb("/data")
     print(f"空きディスク容量: {free:.2f} GB / {total:.2f} GB")
@@ -215,7 +215,7 @@ def battle_content(dao, language):
         next_battle_btn = gr.Button("次のバトルへ", variant="primary", interactive=False, visible=False, elem_id="next_battle_btn")
     user_event = user_input.submit(
       update_user_message,
-      inputs=[user_input, chatbot_a, chatbot_b, weight_class_radio],
+      inputs=[user_input, chatbot_a, chatbot_b],
       outputs=[user_input, chatbot_a, chatbot_b, weight_class_radio],
       queue=False
     )
