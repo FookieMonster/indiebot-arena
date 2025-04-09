@@ -250,4 +250,10 @@ def battle_content(dao, language):
         model_dropdown_a, model_dropdown_b, weight_class_radio
       ]
     )
+
+  battle_ui.load(
+    fn=fetch_model_dropdown,
+    inputs=[weight_class_radio],
+    outputs=[model_dropdown_a, model_dropdown_b, dropdown_options_state]
+  )
   return battle_ui

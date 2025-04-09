@@ -162,7 +162,7 @@ def registration_content(dao, language):
     initial_weight = "U-5GB"
     return "", initial_weight, "", "", gr.update(interactive=True), gr.update(interactive=False), gr.update(interactive=False), None
 
-  with gr.Blocks(css="style.css") as ui:
+  with gr.Blocks(css="style.css") as registration_ui:
     gr.Markdown(DESCRIPTION)
     weight_class_radio = gr.Radio(choices=["U-5GB", "U-10GB"], label="階級", value="U-5GB")
     mdl_list = gr.Dataframe(
@@ -172,7 +172,6 @@ def registration_content(dao, language):
       interactive=False
     )
     weight_class_radio.change(fn=fetch_models, inputs=weight_class_radio, outputs=mdl_list)
-    ui.load(fn=fetch_models, inputs=weight_class_radio, outputs=mdl_list)
     with gr.Accordion("🔰 モデルの登録ガイド", open=False):
       with open(docs_path, "r", encoding="utf-8") as f:
         markdown_content = f.read()
@@ -197,4 +196,6 @@ def registration_content(dao, language):
                                                                           chat_test_btn, register_btn])
       clear_btn.click(fn=clear_all, inputs=[], outputs=[model_id_input, reg_weight_class_radio, description_input,
                                                         output_box, test_btn, chat_test_btn, register_btn, meta_state])
-  return ui
+
+  registration_ui.load(fn=fetch_models, inputs=weight_class_radio, outputs=mdl_list)
+  return registration_ui
