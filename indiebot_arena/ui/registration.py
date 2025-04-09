@@ -116,14 +116,17 @@ def registration_content(dao, language):
   def chat_test(model_id, current_output):
     question = "日本の首都は？"
     expected_word = "東京"
+    conv_history = [{"role": "user", "content": question}]
+    final_response = ""
     try:
-      response = generate(question, [], model_id)
+      for text in generate(conv_history, model_id):
+        final_response = text
     except Exception as e:
       error_msg = f"エラー: {str(e)}"
       return (current_output + "\n" + error_msg, gr.update(interactive=False))
 
-    result_text = f"質問: {question}\n応答: {response}\n"
-    if expected_word in response:
+    result_text = f"質問: {question}\n応答: {final_response}\n"
+    if expected_word in final_response:
       result_text += "成功: 応答に期待するワードが含まれています。\nモデル登録を実施して下さい。\n"
       register_enabled = True
     else:
