@@ -16,7 +16,7 @@ with gr.Blocks(theme=gr.themes.Citrus(primary_hue="sky"), css_paths="style.css")
   with gr.Tabs():
     with gr.TabItem("🏆 リーダーボード"):
       leaderboard_content(dao, LANGUAGE)
-    with gr.TabItem("⚔️ モデルに投票"):
+    with gr.TabItem("⚔️ チャット対戦"):
       battle_content(dao, LANGUAGE)
     with gr.TabItem("📚️ モデルの登録"):
       registration_content(dao, LANGUAGE)
