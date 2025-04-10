@@ -4,7 +4,7 @@ import gradio as gr
 
 from indiebot_arena.config import LOCAL_TESTING
 from indiebot_arena.service.arena_service import ArenaService
-from indiebot_arena.ui.battle import generate
+from indiebot_arena.ui.battle import generate, remove_chat_tokens
 from indiebot_arena.util.cache_manager import get_free_space_gb, clear_hf_cache
 
 DESCRIPTION = "### 💬 Playground"
@@ -29,7 +29,8 @@ def bot1_response(history, model_id):
   history.append({"role": "assistant", "content": ""})
   conv_history = history[:-1]
   for text in generate(conv_history, model_id):
-    history[-1]["content"] = text
+    cleaned_text = remove_chat_tokens(text)
+    history[-1]["content"] = cleaned_text
     yield history
 
 

@@ -1,6 +1,7 @@
 import hashlib
 import os
 import random
+import re
 from collections.abc import Iterator
 from threading import Thread
 
@@ -17,6 +18,11 @@ DESCRIPTION = "### 💬 チャットバトル"
 
 base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 docs_path = os.path.join(base_dir, "docs", "battle_header.md")
+
+
+def remove_chat_tokens(text: str) -> str:
+  pattern = re.compile(r'</?(?:start_of_turn|end_of_turn)>')
+  return pattern.sub('', text).strip()
 
 
 @spaces.GPU(duration=30)
@@ -80,7 +86,8 @@ def bot1_response(history, model_id):
   history.append({"role": "assistant", "content": ""})
   conv_history = history[:-1]
   for text in generate(conv_history, model_id):
-    history[-1]["content"] = text
+    cleaned_text = remove_chat_tokens(text)
+    history[-1]["content"] = cleaned_text
     yield history, gr.update(interactive=True), gr.update(interactive=True)
 
 
@@ -89,7 +96,8 @@ def bot2_response(history, model_id):
   history.append({"role": "assistant", "content": ""})
   conv_history = history[:-1]
   for text in generate(conv_history, model_id):
-    history[-1]["content"] = text
+    cleaned_text = remove_chat_tokens(text)
+    history[-1]["content"] = cleaned_text
     yield history, gr.update(interactive=True), gr.update(interactive=True)
 
 
