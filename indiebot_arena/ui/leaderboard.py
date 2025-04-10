@@ -10,6 +10,7 @@ DESCRIPTION = "### 🏆️ リーダーボード"
 base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 docs_path = os.path.join(base_dir, "docs", "leaderboard_header.md")
 
+
 def leaderboard_content(dao, language):
   arena_service = ArenaService(dao)
 
@@ -27,6 +28,18 @@ def leaderboard_content(dao, language):
       data = [["No data available", "", "", "", ""]]
     df = pd.DataFrame(data, columns=["Model Name", "Elo Score", "File Size (GB)", "Description", "Last Updated"])
     df.insert(0, "Rank", range(1, len(df) + 1))
+
+    def add_emoji(row):
+      if row['Rank']==1:
+        return "🥇 " + row['Model Name']
+      elif row['Rank']==2:
+        return "🥈 " + row['Model Name']
+      elif row['Rank']==3:
+        return "🥉 " + row['Model Name']
+      else:
+        return row['Model Name']
+
+    df["Model Name"] = df.apply(add_emoji, axis=1)
     return df
 
   initial_weight_class = "U-5GB"
