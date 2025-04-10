@@ -29,30 +29,25 @@ def leaderboard_content(dao, language):
     df = pd.DataFrame(data, columns=["Model Name", "Elo Score", "File Size (GB)", "Description", "Last Updated"])
     df.insert(0, "Rank", range(1, len(df) + 1))
 
-    def add_emoji(row):
-      if row['Rank']==1:
-        return "🥇 " + row['Model Name']
-      elif row['Rank']==2:
-        return "🥈 " + row['Model Name']
-      elif row['Rank']==3:
-        return "🥉 " + row['Model Name']
-      else:
-        return row['Model Name']
-
-    df["Model Name"] = df.apply(add_emoji, axis=1)
-
     def add_link(row):
-      decorated_name = row["Model Name"]
-      if decorated_name.startswith("🥇 ") or decorated_name.startswith("🥈 ") or decorated_name.startswith("🥉 "):
-        emoji_part, pure_model_name = decorated_name.split(" ", 1)
-        return f'{emoji_part} <a href="https://huggingface.co/{pure_model_name}" target="_blank">{pure_model_name}</a>'
+      raw_name = row["Model Name"]
+      if raw_name!="Unknown":
+        return f'<a href="https://huggingface.co/{raw_name}" target="_blank">{raw_name}</a>'
       else:
-        if decorated_name!="Unknown":
-          return f'<a href="https://huggingface.co/{decorated_name}" target="_blank">{decorated_name}</a>'
-        else:
-          return decorated_name
+        return raw_name
 
     df["Model Name"] = df.apply(add_link, axis=1)
+
+    def add_emoji(row):
+      rank = row["Rank"]
+      linked_name = row["Model Name"]
+      emoji = {1: "🥇", 2: "🥈", 3: "🥉"}.get(rank, "")
+      if emoji:
+        return f'{emoji} {linked_name}'
+      else:
+        return linked_name
+
+    df["Model Name"] = df.apply(add_emoji, axis=1)
     return df
 
   initial_weight_class = "U-5GB"
