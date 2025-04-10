@@ -40,6 +40,19 @@ def leaderboard_content(dao, language):
         return row['Model Name']
 
     df["Model Name"] = df.apply(add_emoji, axis=1)
+
+    def add_link(row):
+      decorated_name = row["Model Name"]
+      if decorated_name.startswith("🥇 ") or decorated_name.startswith("🥈 ") or decorated_name.startswith("🥉 "):
+        emoji_part, pure_model_name = decorated_name.split(" ", 1)
+        return f'{emoji_part} <a href="https://huggingface.co/{pure_model_name}" target="_blank">{pure_model_name}</a>'
+      else:
+        if decorated_name!="Unknown":
+          return f'<a href="https://huggingface.co/{decorated_name}" target="_blank">{decorated_name}</a>'
+        else:
+          return decorated_name
+
+    df["Model Name"] = df.apply(add_link, axis=1)
     return df
 
   initial_weight_class = "U-5GB"
@@ -51,7 +64,8 @@ def leaderboard_content(dao, language):
     weight_class_radio = gr.Radio(choices=["U-5GB", "U-10GB"], label="階級", value=initial_weight_class)
     leaderboard_table = gr.Dataframe(
       headers=["Rank", "Model Name", "Elo Score", "File Size (GB)", "Description", "Last Updated"],
-      interactive=False
+      interactive=False,
+      datatype="markdown"
     )
     refresh_btn = gr.Button("更新", variant="primary")
     refresh_btn.click(fn=fetch_leaderboard_data, inputs=weight_class_radio, outputs=leaderboard_table)
