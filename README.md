@@ -48,7 +48,7 @@ indiebot-arena/
 
 #### 前提条件
 - Python 3.10
-- MongoDB 7.x 以上 (ローカル)
+- MongoDB 8.x 以上 (ローカル)
 
 ```bash
 # GitHubリポジトリをクローン
@@ -85,7 +85,7 @@ python app.py
 
 #### 前提条件
 - Python 3.10
-- MongoDB Atlas クラウド（Free - 512MB）
+- MongoDB Atlas クラウド（Freeプラン - 512MB）
 - Hugging Face SpacesのZeroGPU（月額9ドル - A100 40GB）
 - Hugging Face SpacesのPersistent Storage（月額25ドル - 150GB）
 
@@ -114,7 +114,7 @@ pinned: false
 
 #### デプロイ
 
-TODO: 現在は手動でファイルをSpacesにデプロイ
+TODO: 現在は手動でファイルをSpacesに直接デプロイ
 
 ### 🤝 コントリビューション
 バグ報告、機能リクエスト、プルリクエストを歓迎します！
