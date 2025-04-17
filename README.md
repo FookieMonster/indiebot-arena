@@ -85,18 +85,20 @@ python app.py
 
 #### 前提条件
 - Python 3.10
-- MongoDB Atlas クラウド（Freeプラン - 512MB）
-- Hugging Face SpacesのZeroGPU（月額9ドル - A100 40GB）
-- Hugging Face SpacesのPersistent Storage（月額25ドル - 150GB）
+- MongoDB Atlas Cloud（Freeプラン - 512MB）
+- SpacesのZeroGPU（月額9ドル - A100 40GB）
+- SpacesのPersistent Storage（月額25ドル - 150GB）
 
 ```bash
 # 以下の環境変数をSpacesのsettingsから設定してください
-# MONGO_DB_URIとHF_TOKENは秘匿情報なので、必ずSecrets側の環境変数に設定してください。
 MONGO_DB_URI=mongodb+srv://xxx:yyy@zzz/?aaa=bbb&ccc=ddd
 MONGO_DB_NAME=indiebot_arena_db
 HF_TOKEN=hf_xxxxxxxxxxxxxxxxxx（READ権限）
 HF_HOME=/data/.huggingface（永続化ストレージを使う場合）
 ```
+
+> [!WARNING]
+> MONGO_DB_URIとHF_TOKENは必ずSecrets側の環境変数に設定してください。
 
 #### GradioのSDKバージョンを指定
 
