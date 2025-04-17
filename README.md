@@ -48,7 +48,7 @@ indiebot-arena/
 
 #### 前提条件
 - Python 3.10
-- MongoDB 7.x 以上 (ローカル or Atlasクラウド)
+- MongoDB 7.x 以上 (ローカル)
 
 ```bash
 # GitHubリポジトリをクローン
@@ -85,8 +85,9 @@ python app.py
 
 #### 前提条件
 - Python 3.10
-- MongoDB 7.x 以上 (Atlasクラウド)
-- Hugging Face SpacesのZeroGPU（月額9ドル）
+- MongoDB Atlas クラウド（Free - 512MB）
+- Hugging Face SpacesのZeroGPU（月額9ドル - A100 40GB）
+- Hugging Face SpacesのPersistent Storage（月額25ドル - 150GB）
 
 ```bash
 # 以下の環境変数をSpacesのsettingsから設定してください
@@ -94,7 +95,7 @@ python app.py
 MONGO_DB_URI=mongodb+srv://xxx:yyy@zzz/?aaa=bbb&ccc=ddd
 MONGO_DB_NAME=indiebot_arena_db
 HF_TOKEN=hf_xxxxxxxxxxxxxxxxxx（READ権限）
-HF_HOME=/data/.huggingface（永続化ディスクを使う場合）
+HF_HOME=/data/.huggingface（永続化ストレージを使う場合）
 ```
 
 #### GradioのSDKバージョンを指定
