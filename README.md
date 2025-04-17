@@ -46,7 +46,7 @@ indiebot-arena/
 
 ### ⚙️ セットアップ手順（ローカル環境）
 
-##### 前提条件
+#### 前提条件
 - Python 3.10
 - MongoDB 7.x 以上 (ローカル or Atlasクラウド)
 
