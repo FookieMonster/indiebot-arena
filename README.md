@@ -44,5 +44,45 @@ indiebot-arena/
 - **Hugging Face Spaces** - ホスティング環境
 - **ZeroGPU** - GPU環境
 
+### ⚙️ セットアップ手順
+
+### ローカル環境
+
+##### 前提条件
+- Python 3.10
+- MongoDB 7.x 以上 (ローカル or Atlasクラウド)
+
+```bash
+# GitHubリポジトリをクローン
+git clone https://github.com/FookieMonster/indiebot-arena
+cd ./indiebot-arena
+```
+
+```bash
+# 仮想環境を作成
+python -m venv .venv
+source .venv/bin/activate   # Windows は .venv\Scripts\activate
+```
+
+```bash
+# 必要なPythonパッケージをインストール
+pip install -r requirements.txt
+```
+
+```bash
+# .env ファイルを作成して、以下の環境変数を記述してください
+MONGO_DB_URI=mongodb://localhost:27017
+MONGO_DB_NAME=test_db
+LOCAL_TESTING=True
+```
+
+```bash
+# アプリを起動
+python app.py
+```
+ブラウザで http://localhost:7860 にアクセスして確認できます。
+
+#### HF Spaces環境
+
 ### 🤝 コントリビューション
 バグ報告、機能リクエスト、プルリクエストを歓迎します！
