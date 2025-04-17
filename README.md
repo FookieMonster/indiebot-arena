@@ -44,9 +44,7 @@ indiebot-arena/
 - **Hugging Face Spaces** - ホスティング環境
 - **ZeroGPU** - GPU環境
 
-### ⚙️ セットアップ手順
-
-### ローカル環境
+### ⚙️ セットアップ手順（ローカル環境）
 
 ##### 前提条件
 - Python 3.10
@@ -73,6 +71,7 @@ pip install -r requirements.txt
 # .env ファイルを作成して、以下の環境変数を記述してください
 MONGO_DB_URI=mongodb://localhost:27017
 MONGO_DB_NAME=test_db
+HF_TOKEN=hf_xxxxxxxxxxxxxxxxxx（READ権限）
 LOCAL_TESTING=True
 ```
 
@@ -82,7 +81,39 @@ python app.py
 ```
 ブラウザで http://localhost:7860 にアクセスして確認できます。
 
-#### HF Spaces環境
+### ⚙️ セットアップ手順（Hugging Face Spaces環境）
+
+#### 前提条件
+- Python 3.10
+- MongoDB 7.x 以上 (Atlasクラウド)
+- Hugging Face SpacesのZeroGPU（月額9ドル）
+
+```bash
+# 以下の環境変数をSpacesのsettingsから設定してください
+# MONGO_DB_URIとHF_TOKENは秘匿情報なので、必ずSecrets側の環境変数に設定してください。
+MONGO_DB_URI=mongodb+srv://xxx:yyy@zzz/?aaa=bbb&ccc=ddd
+MONGO_DB_NAME=indiebot_arena_db
+HF_TOKEN=hf_xxxxxxxxxxxxxxxxxx（READ権限）
+HF_HOME=/data/.huggingface（永続化ディスクを使う場合）
+```
+
+#### GradioのSDKバージョンを指定
+
+```
+# README.md
+title: IndieBot Arena Test
+emoji: 💬
+colorFrom: yellow
+colorTo: yellow
+sdk: gradio
+sdk_version: 5.12.0
+app_file: app.py
+pinned: false
+```
+
+#### デプロイ
+
+TODO: 現在は手動でファイルをSpacesにデプロイ
 
 ### 🤝 コントリビューション
 バグ報告、機能リクエスト、プルリクエストを歓迎します！
