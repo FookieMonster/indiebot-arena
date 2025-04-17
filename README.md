@@ -84,7 +84,6 @@ python app.py
 ### ⚙️ セットアップ手順（Hugging Face Spaces環境）
 
 #### 前提条件
-- Python 3.10
 - MongoDB Atlas Cloud（Freeプラン - 512MB）
 - SpacesのZeroGPU（月額9ドル - A100 40GB）
 - SpacesのPersistent Storage（月額25ドル - 150GB）
@@ -98,7 +97,7 @@ HF_HOME=/data/.huggingface（永続化ストレージを使う場合）
 ```
 
 > [!WARNING]
-> MONGO_DB_URIとHF_TOKENは必ずSecrets側の環境変数に設定してください。
+> MONGO_DB_URIとHF_TOKENは秘匿情報なので、必ずSecrets側に設定してください。
 
 #### GradioのSDKバージョンを指定
 
