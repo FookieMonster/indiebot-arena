@@ -86,20 +86,26 @@ python app.py
 #### 前提条件
 - MongoDB Atlas Cloud（Freeプラン - 512MB）
 - SpacesのZeroGPU（月額9ドル - A100 40GB）
-- SpacesのPersistent Storage（月額25ドル - 150GB）
+- SpacesのPersistent Storage（月額25ドル - 150GB）*オプション*
+
+> [!TIP]
+> SpacesのPersistent Storageを使用するとキャッシュのヒット率が上がり、  
+> チャットの応答時間が高速になります。
 
 ```bash
 # 以下の環境変数をSpacesのsettingsから設定してください
 MONGO_DB_URI=mongodb+srv://xxx:yyy@zzz/?aaa=bbb&ccc=ddd
 MONGO_DB_NAME=indiebot_arena_db
 HF_TOKEN=hf_xxxxxxxxxxxxxxxxxx（READ権限）
-HF_HOME=/data/.huggingface（永続化ストレージを使う場合）
+HF_HOME=/data/.huggingface（Persistent Storageを使う場合）オプション
 ```
 
 > [!WARNING]
 > MONGO_DB_URIとHF_TOKENは秘匿情報なので、必ずSecrets側に設定してください。
 
 #### GradioのSDKバージョンを指定
+
+Spacesメタ情報設定(README.md)でsdk_versionに**5.12.0**を指定します。
 
 ```
 # README.md

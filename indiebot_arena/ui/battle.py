@@ -10,9 +10,9 @@ import spaces
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer, TextIteratorStreamer
 
-from indiebot_arena.config import MODEL_SELECTION_MODE, MAX_INPUT_TOKEN_LENGTH, MAX_NEW_TOKENS, LOCAL_TESTING
+from indiebot_arena.config import MODEL_SELECTION_MODE, MAX_INPUT_TOKEN_LENGTH, MAX_NEW_TOKENS
 from indiebot_arena.service.arena_service import ArenaService
-from indiebot_arena.util.cache_manager import get_free_space_gb, clear_hf_cache
+from indiebot_arena.util.cache_manager import clear_hf_cache_if_low_disk_space
 
 DESCRIPTION = "### 💬 チャットバトル"
 
@@ -70,11 +70,7 @@ def generate(chat_history: list,
 
 
 def update_user_message(user_message, history_a, history_b):
-  if not LOCAL_TESTING:
-    total, _, free = get_free_space_gb("/data")
-    print(f"空きディスク容量: {free:.2f} GB / {total:.2f} GB")
-    if free < (total * 0.2):
-      clear_hf_cache()
+  clear_hf_cache_if_low_disk_space()
 
   new_history_a = history_a + [{"role": "user", "content": user_message}]
   new_history_b = history_b + [{"role": "user", "content": user_message}]

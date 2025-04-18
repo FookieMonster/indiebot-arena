@@ -2,10 +2,9 @@ import os
 
 import gradio as gr
 
-from indiebot_arena.config import LOCAL_TESTING
 from indiebot_arena.service.arena_service import ArenaService
 from indiebot_arena.ui.battle import generate, remove_chat_tokens
-from indiebot_arena.util.cache_manager import get_free_space_gb, clear_hf_cache
+from indiebot_arena.util.cache_manager import clear_hf_cache_if_low_disk_space
 
 DESCRIPTION = "### 💬 Playground"
 
@@ -14,11 +13,7 @@ docs_path = os.path.join(base_dir, "docs", "battle_header.md")
 
 
 def update_user_message(user_message, history_a):
-  if not LOCAL_TESTING:
-    total, _, free = get_free_space_gb("/data")
-    print(f"空きディスク容量: {free:.2f} GB / {total:.2f} GB")
-    if free < (total * 0.2):
-      clear_hf_cache()
+  clear_hf_cache_if_low_disk_space()
 
   new_history_a = history_a + [{"role": "user", "content": user_message}]
   return "", new_history_a
